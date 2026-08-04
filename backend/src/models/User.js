@@ -1,0 +1,131 @@
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+    fullName: {
+        type: String,
+        required: [true, 'Full name is required'],
+        trim: true
+    },
+    email: {
+        type: String,
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        index: true
+    },
+    password: {
+        type: String,
+        required: [true, 'Password is required'],
+        minlength: 6,
+        select: false
+    },
+    role: {
+        type: String,
+        enum: ['student', 'teacher', 'admin'],
+        default: 'student',
+        index: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    approved: {
+        type: Boolean,
+        default: false
+    },
+    department: {
+        type: String,
+        trim: true
+    },
+    semester: {
+        type: String,
+        trim: true
+    },
+    rollNumber: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+        index: true
+    },
+    registrationNumber: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+        index: true
+    },
+    phone: {
+        type: String,
+        trim: true
+    },
+    profileImage: {
+        type: String,
+        default: 'default.jpg'
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    lastLogin: {
+        type: Date
+    }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+// Virtual populate for StudentProfile
+userSchema.virtual('studentProfile', {
+    ref: 'StudentProfile',
+    localField: '_id',
+    foreignField: 'userId',
+    justOne: true
+});
+
+// Virtual populate for BehaviorRecords
+userSchema.virtual('behaviorRecords', {
+    ref: 'BehaviorRecord',
+    localField: '_id',
+    foreignField: 'studentId'
+});
+
+// Virtual populate for Notifications
+userSchema.virtual('notifications', {
+    ref: 'Notification',
+    localField: '_id',
+    foreignField: 'userId'
+});
+
+// Virtual populate for Sent Messages
+userSchema.virtual('sentMessages', {
+    ref: 'Message',
+    localField: '_id',
+    foreignField: 'senderId'
+});
+
+// Virtual populate for Received Messages
+userSchema.virtual('receivedMessages', {
+    ref: 'Message',
+    localField: '_id',
+    foreignField: 'receiverId'
+});
+
+// Hash password before saving
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+});
+
+// Method to verify password
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+module.exports = User;

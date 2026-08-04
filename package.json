@@ -1,0 +1,12 @@
+{
+  "name": "student-dropout-prediction-root",
+  "version": "1.0.0",
+  "description": "Student Dropout Risk Prediction System Workspace Root",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend dev",
+    "dev:backend": "npm --prefix backend run dev"
+  }
+}
