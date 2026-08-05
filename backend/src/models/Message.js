@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
+    conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation',
+        required: true,
+        index: true
+    },
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -13,14 +19,19 @@ const messageSchema = new mongoose.Schema({
         required: true,
         index: true
     },
-    message: {
+    messageType: {
         type: String,
-        required: true,
-        trim: true
+        enum: ['text', 'file'],
+        default: 'text'
     },
-    attachments: [{
-        type: String
-    }],
+    text: {
+        type: String,
+        trim: true,
+        maxlength: 1000
+    },
+    file: {
+        type: String // To prepare for future file uploads
+    },
     isRead: {
         type: Boolean,
         default: false

@@ -6,3 +6,22 @@ build/
 .DS_Store
 *.log
 coverage/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# ML Service virtual environment
+ml-service/venv/
+
+# Generated log files
+backend/logs/
+
+# ML model artifacts (large binary files - regenerate with training scripts)
+ml-service/saved_models/*.pkl
+ml-service/saved_models/*.json
+ml-service/processed/
+ml-service/data/
+ml-service/charts/
+ml-service/reports/

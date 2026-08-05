@@ -6,6 +6,9 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+
 // Load environment variables
 dotenv.config();
 
@@ -17,6 +20,17 @@ const app = express();
 
 // 1. Security HTTP Headers
 app.use(helmet());
+
+// 1.5 Global Rate Limiting
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+
+if (process.env.NODE_ENV !== 'test') {
+    app.use('/api', globalLimiter);
+}
 
 // 2. CORS Policy Configuration
 const corsOptions = {
@@ -34,10 +48,13 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// 4. Request Body & Cookie Parsing
+// 4. Request Body, Cookie Parsing & Data Sanitization
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET || 'cookie_secret_fallback'));
+
+// Data Sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
 // 5. Static File Serving (e.g. Uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -49,7 +66,14 @@ app.use('/api/v1', apiRouter);
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
 app.use('/api/admin', require('./routes/admin'));
-app.use('/api', require('./routes/predict'));
+app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/api/student/timeline', require('./routes/timelineRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/admin/system-health', require('./routes/systemHealthRoutes'));
+app.use('/api/predictions', require('./routes/predictionExplanationRoutes'));
+app.use('/api/recommendations', require('./routes/recommendationRoutes'));
 
 // Base Root Route
 app.get('/', (req, res) => {

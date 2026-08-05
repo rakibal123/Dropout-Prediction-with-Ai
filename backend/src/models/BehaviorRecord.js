@@ -9,43 +9,63 @@ const behaviorRecordSchema = new mongoose.Schema({
     },
     attendancePercentage: {
         type: Number,
+        required: true,
         min: 0,
-        max: 100,
-        default: 0
+        max: 100
     },
     assignmentSubmissionRate: {
         type: Number,
+        required: true,
         min: 0,
-        max: 100,
-        default: 0
+        max: 100
     },
     quizAverage: {
         type: Number,
+        required: true,
         min: 0,
-        max: 100,
-        default: 0
+        max: 100
     },
     midtermMarks: {
         type: Number,
+        required: true,
         min: 0,
-        max: 100,
-        default: 0
+        max: 100
     },
     studyHoursPerWeek: {
         type: Number,
+        required: true,
         min: 0,
-        default: 0
+        max: 80
     },
     engagementScore: {
         type: Number,
-        min: 0,
-        max: 100,
-        default: 0
+        required: true,
+        min: 1,
+        max: 10
     },
     loginFrequency: {
         type: Number,
+        required: true,
         min: 0,
-        default: 0
+        max: 100
+    },
+    participationScore: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 10
+    },
+    stressLevel: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 10
+    },
+    motivationLevel: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 10
     },
     recordDate: {
         type: Date,

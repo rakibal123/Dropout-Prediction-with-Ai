@@ -1,18 +1,30 @@
 const express = require('express');
-const { protect, restrictTo } = require('../middleware/authMiddleware');
-const { getPendingStudents, approveStudent, rejectStudent } = require('../controllers/adminController');
+const adminController = require('../controllers/adminController');
+const verifyToken = require('../middleware/verifyToken');
+const authorizeRoles = require('../middleware/authorizeRoles');
 
 const router = express.Router();
 
-// Apply auth middleware to all routes in this file
-router.use(protect);
+// Apply auth and role middleware
+router.use(verifyToken, authorizeRoles('admin'));
 
-// Apply role restriction to all routes in this file
-router.use(restrictTo('admin', 'teacher'));
+// Dashboard APIs
+router.get('/dashboard', adminController.getDashboard);
+router.get('/analytics', adminController.getAnalytics);
+router.get('/reports', adminController.getReports);
+router.get('/system-logs', adminController.getSystemLogs);
 
-// Routes
-router.route('/pending-students').get(getPendingStudents);
-router.route('/approve-student/:id').put(approveStudent);
-router.route('/reject-student/:id').put(rejectStudent);
+// User Management APIs
+router.route('/users')
+    .get(adminController.getUsers);
+
+router.route('/users/:id')
+    .get(adminController.getUserById)
+    .put(adminController.updateUser)
+    .delete(adminController.deleteUser);
+
+// Legacy/Explicit Student Approval APIs (if needed by frontend directly)
+router.put('/users/:id/approve', adminController.approveStudent);
+router.put('/users/:id/reject', adminController.rejectStudent);
 
 module.exports = router;

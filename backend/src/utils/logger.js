@@ -1,39 +1,76 @@
-const fs = require('fs');
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
 const path = require('path');
 
-const logDir = path.join(__dirname, '../logs');
+const logDir = path.join(__dirname, '../../logs'); // move logs up to root level of backend
 
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+const { combine, timestamp, printf, colorize, errors } = winston.format;
+
+// Define custom log format
+const logFormat = printf(({ level, message, timestamp, stack }) => {
+    return `[${timestamp}] ${level}: ${stack || message}`;
+});
+
+// Configure daily rotating transports
+const fileRotateTransport = new DailyRotateFile({
+    filename: 'application-%DATE%.log',
+    dirname: logDir,
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d', // Keep logs for 14 days
+    level: 'info',
+});
+
+const errorFileRotateTransport = new DailyRotateFile({
+    filename: 'error-%DATE%.log',
+    dirname: logDir,
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '30d', // Keep error logs for 30 days
+    level: 'error',
+});
+
+const logger = winston.createLogger({
+    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+    format: combine(
+        errors({ stack: true }), // capture stack trace
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        logFormat
+    ),
+    transports: [
+        fileRotateTransport,
+        errorFileRotateTransport,
+    ],
+    exceptionHandlers: [
+        new DailyRotateFile({
+            filename: 'exceptions-%DATE%.log',
+            dirname: logDir,
+            datePattern: 'YYYY-MM-DD',
+            maxSize: '20m',
+            maxFiles: '30d',
+        })
+    ],
+    rejectionHandlers: [
+        new DailyRotateFile({
+            filename: 'rejections-%DATE%.log',
+            dirname: logDir,
+            datePattern: 'YYYY-MM-DD',
+            maxSize: '20m',
+            maxFiles: '30d',
+        })
+    ]
+});
+
+// Add console transport for development/testing
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+    logger.add(new winston.transports.Console({
+        format: combine(
+            colorize(),
+            logFormat
+        )
+    }));
 }
-
-const formatLog = (level, message) => {
-  const timestamp = new Date().toISOString();
-  return `[${timestamp}] [${level.toUpperCase()}]: ${message}`;
-};
-
-const logger = {
-  info: (message) => {
-    const logStr = formatLog('info', message);
-    console.log(`\x1b[36m${logStr}\x1b[0m`);
-    try {
-      fs.appendFileSync(path.join(logDir, 'app.log'), logStr + '\n');
-    } catch (_) {}
-  },
-  warn: (message) => {
-    const logStr = formatLog('warn', message);
-    console.warn(`\x1b[33m${logStr}\x1b[0m`);
-    try {
-      fs.appendFileSync(path.join(logDir, 'app.log'), logStr + '\n');
-    } catch (_) {}
-  },
-  error: (message) => {
-    const logStr = formatLog('error', message);
-    console.error(`\x1b[31m${logStr}\x1b[0m`);
-    try {
-      fs.appendFileSync(path.join(logDir, 'error.log'), logStr + '\n');
-    } catch (_) {}
-  }
-};
 
 module.exports = logger;

@@ -19,9 +19,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useToast } from "@/context/ToastContext";
-import { RiskAssessmentModal, RiskAssessmentData } from "@/components/RiskAssessmentModal";
+import { ExplainableAIModal } from "@/components/ExplainableAIModal";
 
 interface PredictionResult {
+    id: string;
     riskLevel: "Low" | "Medium" | "High";
     probability: number;
     reasons: string[];
@@ -39,8 +40,6 @@ export default function StudentDashboard() {
     const [behavior, setBehavior] = useState<any>(null);
     
     const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [lastInputData, setLastInputData] = useState<RiskAssessmentData | null>(null);
     const { showToast } = useToast();
     const router = useRouter();
 
@@ -85,70 +84,16 @@ export default function StudentDashboard() {
 
             if (predData.data) {
                 setPrediction({
+                    id: predData.data._id,
                     riskLevel: predData.data.riskLevel,
-                    probability: predData.data.probability,
-                    reasons: predData.data.predictionReason ? [predData.data.predictionReason] : ["Low engagement", "Declining attendance"],
-                    suggestions: predData.data.recommendation ? [predData.data.recommendation] : ["Meet with academic advisor", "Join study groups"]
+                    probability: predData.data.probability?.high || predData.data.confidence || 0,
+                    reasons: predData.data.topFactors ? predData.data.topFactors.map((f: any) => `${f.feature} (${f.impact} Impact)`) : (predData.data.reasons || ["Low engagement", "Declining attendance"]),
+                    suggestions: predData.data.recommendation ? predData.data.recommendation : (predData.data.suggestions || ["Meet with academic advisor", "Join study groups"])
                 });
             }
         } catch (err: any) {
             console.error("Dashboard fetch error:", err);
             setError("Could not load real-time data. " + (err.message || "Network Error"));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleCheckRisk = async (data: RiskAssessmentData) => {
-        setIsAssessing(true);
-        setError(null);
-        showToast("Calculating your risk profile...", "info");
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) throw new Error("No authentication token found. Please log in again.");
-
-            const response = await fetch("http://localhost:5000/api/predict-risk", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(data),
-                signal: controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            const result = await response.json();
-
-            if (result.status === "success" || result.riskLevel) {
-                setPrediction(result.data || result);
-                setLastInputData(data); // Save the data to update UI
-                
-                // Refresh backend data so behavior/dashboard states update
-                fetchDashboardData();
-                
-                showToast("Assessment complete! Your report is ready.", "success");
-                setIsModalOpen(false); // Close modal on success
-            } else {
-                throw new Error(result.message || "Failed to fetch risk assessment");
-            }
-        } catch (err: any) {
-            clearTimeout(timeoutId);
-            let msg = err.message || "An error occurred while checking risk";
-            if (err.name === 'AbortError') msg = "Request timed out. Is the backend server running?";
-
-            setError(msg);
-            showToast(msg, "error");
-        } finally {
-            setIsAssessing(false);
-        }
-    };
-
     if (isLoading) {
         return (
             <DashboardLayout role="student">
@@ -162,10 +107,10 @@ export default function StudentDashboard() {
 
     const firstName = dashboardData?.fullName ? dashboardData.fullName.split(" ")[0] : (user?.name ? user.name.split(" ")[0] : "Student");
     
-    // Use real behavior data if available, fallback to defaults/lastInputData
-    const attPct = behavior?.attendancePercentage || (lastInputData ? lastInputData.attendance : 0);
-    const subPct = behavior?.assignmentSubmissionRate || (lastInputData ? lastInputData.submissionRate : 0);
-    const quizAvg = behavior?.quizAverage || (lastInputData ? lastInputData.ctMark : 0);
+    // Use real behavior data if available
+    const attPct = behavior?.attendancePercentage || 0;
+    const subPct = behavior?.assignmentSubmissionRate || 0;
+    const quizAvg = behavior?.quizAverage || 0;
 
     const stats = [
         {
@@ -198,7 +143,7 @@ export default function StudentDashboard() {
         },
     ];
 
-    const performanceData = [45, 52, 48, 70, 65, 85, 90, lastInputData ? (parseFloat(lastInputData.attendance.toString()) * 0.6 + parseFloat(lastInputData.submissionRate.toString()) * 0.4) : 88];
+    const performanceData = [45, 52, 48, 70, 65, 85, 90, 88];
     const riskData = [
         { label: "Low", value: prediction ? (prediction.riskLevel === 'Low' ? 80 : 10) : 65, color: "bg-risk-low" },
         { label: "Medium", value: prediction ? (prediction.riskLevel === 'Medium' ? 70 : 20) : 25, color: "bg-risk-medium" },
@@ -208,13 +153,6 @@ export default function StudentDashboard() {
     return (
         <DashboardLayout role="student">
             <div className="flex flex-col gap-6">
-                <RiskAssessmentModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    onSubmit={handleCheckRisk}
-                    isLoading={isAssessing}
-                />
-
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Welcome back, {firstName}!</h1>
@@ -241,7 +179,7 @@ export default function StudentDashboard() {
                         </div>
                         <Button
                             className="w-full sm:w-auto shadow-premium group"
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => router.push('/dashboard/student/assessment')}
                             disabled={isAssessing}
                         >
                             {isAssessing ? (
@@ -420,7 +358,7 @@ export default function StudentDashboard() {
                             <ShieldCheck className="h-16 w-16 text-primary/40 mb-4" />
                             <h3 className="text-xl font-bold text-foreground mb-2">No prediction available yet.</h3>
                             <p className="text-muted-foreground mb-6 max-w-sm">Complete your first risk assessment to get a detailed breakdown of your academic standing.</p>
-                            <Button className="shadow-premium" onClick={() => setIsModalOpen(true)}>
+                            <Button className="shadow-premium" onClick={() => router.push('/dashboard/student/assessment')}>
                                 <Zap className="h-4 w-4 mr-2" />
                                 Check My Risk
                             </Button>
@@ -449,9 +387,12 @@ export default function StudentDashboard() {
                                     }`}>
                                     {prediction.riskLevel} Dropout Risk
                                 </div>
-                                <p className="mt-4 text-xs text-muted-foreground text-center max-w-xs leading-relaxed">
+                                <p className="mt-4 text-xs text-muted-foreground text-center max-w-xs leading-relaxed mb-4">
                                     Based on your current behavioral patterns, your risk of dropping out is {prediction.riskLevel.toLowerCase()}.
                                 </p>
+                                {prediction.id && (
+                                    <ExplainableAIModal predictionId={prediction.id} riskLevel={prediction.riskLevel} confidence={prediction.probability} />
+                                )}
                             </CardContent>
                         </Card>
 
@@ -536,40 +477,32 @@ export default function StudentDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none shadow-md">
-                        <CardHeader>
-                            <CardTitle className="text-lg uppercase tracking-wider text-muted-foreground font-bold">Recent Academic Activity</CardTitle>
+                    <Card className="border-none shadow-md overflow-hidden relative group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent z-0"></div>
+                        <CardHeader className="relative z-10">
+                            <CardTitle className="text-lg uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-primary" />
+                                Journey Timeline
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="divide-y divide-border">
-                                {[
-                                    { title: "Advanced Mathematics Quiz", status: "A+", date: "2 hours ago", icon: TrendingUp, statusColor: "text-green-600" },
-                                    { title: "Physics Lab Submission", status: "PENDING", date: "Yesterday", icon: Clock, statusColor: "text-orange-600" },
-                                    { title: "World History Presentation", status: "B", date: "2 days ago", icon: BookOpen, statusColor: "text-blue-600" },
-                                    { title: "Computer Science Assignment", status: "A", date: "4 days ago", icon: TrendingUp, statusColor: "text-green-600" },
-                                ].map((activity, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 px-6 hover:bg-secondary/50 transition-colors group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center text-muted-foreground group-hover:border-primary/30 group-hover:text-primary transition-colors">
-                                                <activity.icon className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold">{activity.title}</p>
-                                                <p className="text-xs text-muted-foreground">{activity.date}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className={`text-sm font-bold ${activity.statusColor}`}>{activity.status}</span>
-                                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                    </div>
-                                ))}
+                        <CardContent className="p-6 relative z-10 flex flex-col justify-between h-[calc(100%-70px)]">
+                            <div>
+                                <p className="text-foreground font-medium mb-4">Track your entire academic progress chronologically.</p>
+                                <ul className="space-y-4 mb-6">
+                                    <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <div className="h-2 w-2 rounded-full bg-primary" /> See Risk Adjustments
+                                    </li>
+                                    <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <div className="h-2 w-2 rounded-full bg-primary" /> View Milestone Badges
+                                    </li>
+                                    <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        <div className="h-2 w-2 rounded-full bg-primary" /> Review Teacher Notes & Messages
+                                    </li>
+                                </ul>
                             </div>
-                            <div className="p-4 bg-secondary/20 text-center">
-                                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                                    View All Activity
-                                </Button>
-                            </div>
+                            <Button className="w-full shadow-md mt-auto group-hover:bg-primary/90 transition-colors" onClick={() => router.push('/dashboard/student/timeline')}>
+                                View Full Timeline <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>

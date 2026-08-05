@@ -1,137 +1,74 @@
-const User = require('../models/User');
+const asyncHandler = require('../utils/asyncHandler');
+const adminService = require('../services/adminService');
+const SystemLog = require('../models/SystemLog');
 
-// @desc    Get all pending students
-// @route   GET /api/admin/pending-students
-// @access  Private (Admin/Teacher)
-exports.getPendingStudents = async (req, res) => {
-    try {
-        const pendingStudents = await User.find({
-            role: 'student',
-            status: 'pending'
-        }).select('-password');
+const getDashboard = asyncHandler(async (req, res) => {
+    const stats = await adminService.getDashboardStats();
+    res.status(200).json({ success: true, data: stats });
+});
 
-        res.status(200).json({
-            status: 'success',
-            results: pendingStudents.length,
-            data: {
-                students: pendingStudents
-            }
-        });
-    } catch (err) {
-        console.error('Error fetching pending students:', err);
-        res.status(500).json({
-            status: 'error',
-            message: 'Internal server error while fetching pending students'
-        });
-    }
+const getUsers = asyncHandler(async (req, res) => {
+    const users = await adminService.getUsers(req.query);
+    res.status(200).json({ success: true, data: users });
+});
+
+const getUserById = asyncHandler(async (req, res) => {
+    const data = await adminService.getUserById(req.params.id);
+    res.status(200).json({ success: true, data });
+});
+
+const updateUser = asyncHandler(async (req, res) => {
+    const user = await adminService.updateUser(req.params.id, req.body, req.user._id, req.ip);
+    res.status(200).json({ success: true, data: user });
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+    await adminService.deleteUser(req.params.id, req.user._id, req.ip);
+    res.status(200).json({ success: true, message: 'User deleted successfully' });
+});
+
+const getAnalytics = asyncHandler(async (req, res) => {
+    const analytics = await adminService.getAnalytics();
+    res.status(200).json({ success: true, data: analytics });
+});
+
+const getReports = asyncHandler(async (req, res) => {
+    const { type } = req.query;
+    // Just a placeholder for returning basic data for reports
+    const stats = await adminService.getDashboardStats();
+    res.status(200).json({ success: true, data: { type, generatedAt: new Date(), stats } });
+});
+
+const getSystemLogs = asyncHandler(async (req, res) => {
+    const logs = await adminService.getSystemLogs(req.query);
+    res.status(200).json({ success: true, data: logs });
+});
+
+const logAdminAction = async (userId, action, ipAddress) => {
+    await SystemLog.create({ userId, action, ipAddress });
 };
 
-// @desc    Approve a pending student
-// @route   PUT /api/admin/approve-student/:id
-// @access  Private (Admin/Teacher)
-exports.approveStudent = async (req, res) => {
-    try {
-        const studentId = req.params.id;
+// Legacy support for approve/reject logic if still needed directly, 
+// though updateUser can handle { status: 'approved' }
+const approveStudent = asyncHandler(async (req, res) => {
+    const user = await adminService.updateUser(req.params.id, { status: 'approved' }, req.user._id, req.ip);
+    res.status(200).json({ success: true, data: user });
+});
 
-        // Find the user first to ensure they are a student
-        const student = await User.findById(studentId);
+const rejectStudent = asyncHandler(async (req, res) => {
+    const user = await adminService.updateUser(req.params.id, { status: 'rejected' }, req.user._id, req.ip);
+    res.status(200).json({ success: true, data: user });
+});
 
-        if (!student) {
-            return res.status(404).json({
-                status: 'fail',
-                message: 'User not found'
-            });
-        }
-
-        if (student.role !== 'student') {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Only students can be approved through this endpoint'
-            });
-        }
-
-        if (student.status === 'approved' || student.approved === true) {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Student is already approved'
-            });
-        }
-
-        // Find and update the document directly
-        const updatedStudent = await User.findByIdAndUpdate(
-            studentId,
-            { status: 'approved', approved: true },
-            { new: true, runValidators: true }
-        ).select('-password');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Student approved successfully',
-            data: {
-                student: updatedStudent
-            }
-        });
-
-    } catch (err) {
-        console.error('Error approving student:', err);
-
-        // Handle invalid MongoDB ObjectId
-        if (err.name === 'CastError' && err.kind === 'ObjectId') {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Invalid student ID format'
-            });
-        }
-
-        res.status(500).json({
-            status: 'error',
-            message: 'Internal server error while approving student'
-        });
-    }
-};
-
-// @desc    Reject a pending student
-// @route   PUT /api/admin/reject-student/:id
-// @access  Private (Admin/Teacher)
-exports.rejectStudent = async (req, res) => {
-    try {
-        const studentId = req.params.id;
-
-        const student = await User.findById(studentId);
-
-        if (!student) {
-            return res.status(404).json({ status: 'fail', message: 'User not found' });
-        }
-
-        if (student.role !== 'student') {
-            return res.status(400).json({ status: 'fail', message: 'Only students can be rejected through this endpoint' });
-        }
-
-        if (student.status === 'rejected') {
-            return res.status(400).json({ status: 'fail', message: 'Student account is already rejected' });
-        }
-
-        const updatedStudent = await User.findByIdAndUpdate(
-            studentId,
-            { status: 'rejected', approved: false },
-            { new: true, runValidators: true }
-        ).select('-password');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Student account rejected',
-            data: {
-                student: updatedStudent
-            }
-        });
-
-    } catch (err) {
-        console.error('Error rejecting student:', err);
-
-        if (err.name === 'CastError' && err.kind === 'ObjectId') {
-            return res.status(400).json({ status: 'fail', message: 'Invalid student ID format' });
-        }
-
-        res.status(500).json({ status: 'error', message: 'Internal server error while rejecting student' });
-    }
+module.exports = {
+    getDashboard,
+    getUsers,
+    getUserById,
+    updateUser,
+    deleteUser,
+    getAnalytics,
+    getReports,
+    getSystemLogs,
+    approveStudent,
+    rejectStudent
 };

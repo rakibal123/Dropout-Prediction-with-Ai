@@ -6,6 +6,7 @@ import { Button } from "./ui/Button";
 import { Menu, X, Bell, Search, UserCircle } from "lucide-react";
 import { Input } from "./ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
+import { NotificationCenter } from "./NotificationCenter";
 
 import ProtectedRoute from "./guards/ProtectedRoute";
 import RoleGuard from "./guards/RoleGuard";
@@ -95,10 +96,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-4">
-                        <Button variant="ghost" size="sm" className="relative h-9 w-9 p-0 rounded-full">
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-risk-high ring-2 ring-card" />
-                        </Button>
+                        <NotificationCenter />
                         <div className="h-8 w-px bg-border hidden sm:block" />
                         <div className="flex items-center gap-2 pl-2">
                             <div className="text-right hidden sm:block">

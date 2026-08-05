@@ -35,19 +35,32 @@ const register = asyncHandler(async (req, res) => {
     }
 });
 
-const generateToken = require('../middleware/generateToken');
+const generateTokens = require('../middleware/generateToken');
 
 const login = asyncHandler(async (req, res) => {
     try {
         const { email, password } = req.body;
         
         const user = await authService.loginUser(email, password);
-        const token = generateToken(res, user);
+        const { accessToken, refreshToken } = generateTokens(res, user);
+        
+        const Session = require('../models/Session');
+        await Session.create({
+            userId: user._id,
+            token: refreshToken,
+            device: 'Web Browser',
+            browser: req.headers['user-agent'] || 'Unknown',
+            os: 'Unknown OS',
+            ipAddress: req.ip || req.connection?.remoteAddress || 'Unknown IP'
+        });
+        
+        user.lastLogin = Date.now();
+        await user.save({ validateBeforeSave: false });
 
         res.status(200).json({
             success: true,
             message: "Login successful.",
-            token: token,
+            token: accessToken,
             user: {
                 id: user._id,
                 fullName: user.fullName,
@@ -86,8 +99,14 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
+    // Optionally remove the Session document from the database
+    // For simplicity, we just clear the cookies on the client side
     res.cookie('jwt', 'none', {
-        expires: new Date(Date.now() + 10 * 1000), // Expire immediately (10s)
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.cookie('refreshToken', 'none', {
+        expires: new Date(Date.now() + 10 * 1000),
         httpOnly: true
     });
 
@@ -97,9 +116,51 @@ const logout = asyncHandler(async (req, res) => {
     });
 });
 
+const refresh = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken;
+    
+    if (!incomingRefreshToken) {
+        return res.status(401).json({ success: false, message: 'Refresh token not found. Please log in again.' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const Session = require('../models/Session');
+    const User = require('../models/User');
+    
+    try {
+        const decoded = jwt.verify(incomingRefreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+        
+        const session = await Session.findOne({ token: incomingRefreshToken, userId: decoded.userId });
+        if (!session) {
+            return res.status(401).json({ success: false, message: 'Invalid session. Please log in again.' });
+        }
+        
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'User no longer exists.' });
+        }
+
+        // Generate new tokens (rotating the refresh token as well)
+        const { accessToken, refreshToken: newRefreshToken } = generateTokens(res, user);
+
+        // Update the session in DB
+        session.token = newRefreshToken;
+        session.lastActive = Date.now();
+        await session.save();
+
+        res.status(200).json({
+            success: true,
+            token: accessToken
+        });
+    } catch (error) {
+        return res.status(401).json({ success: false, message: 'Invalid or expired refresh token. Please log in again.' });
+    }
+});
+
 module.exports = {
     register,
     login,
     getMe,
-    logout
+    logout,
+    refresh
 };

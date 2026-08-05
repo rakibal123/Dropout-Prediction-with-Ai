@@ -1,0 +1,165 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-56789abcdef0",
+		"name": "Dropout Prediction System APIs",
+		"description": "Complete Postman collection for the Student Dropout Risk Prediction System API endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"email\": \"student@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"student\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Predictions",
+			"item": [
+				{
+					"name": "Submit Behavior Record & Predict",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"attendancePercentage\": 85,\n    \"assignmentSubmissionRate\": 90,\n    \"quizAverage\": 78,\n    \"midtermMarks\": 82,\n    \"studyHoursPerWeek\": 15,\n    \"engagementScore\": 7,\n    \"loginFrequency\": 5,\n    \"participationScore\": 8,\n    \"stressLevel\": 4,\n    \"motivationLevel\": 8\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/predict", "host": ["{{baseUrl}}"], "path": ["api", "predict"] }
+					}
+				},
+				{
+					"name": "Get Prediction History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/predict/history", "host": ["{{baseUrl}}"], "path": ["api", "predict", "history"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Recommendations",
+			"item": [
+				{
+					"name": "Get Recommendations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/recommendations", "host": ["{{baseUrl}}"], "path": ["api", "recommendations"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Get Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/messages", "host": ["{{baseUrl}}"], "path": ["api", "messages"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get Dashboard Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/analytics", "host": ["{{baseUrl}}"], "path": ["api", "analytics"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "System Health",
+			"item": [
+				{
+					"name": "Get System Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/admin/system-health", "host": ["{{baseUrl}}"], "path": ["api", "admin", "system-health"] }
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "your_jwt_token_here",
+			"type": "string"
+		}
+	]
+}

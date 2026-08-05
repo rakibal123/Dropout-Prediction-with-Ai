@@ -13,28 +13,46 @@ const predictionHistorySchema = new mongoose.Schema({
         required: true,
         index: true
     },
+    finalScore: {
+        type: Number,
+        required: true
+    },
     riskLevel: {
         type: String,
         enum: ['Low', 'Medium', 'High', 'Critical'],
         required: true
     },
-    probability: {
+    confidence: {
         type: Number,
-        min: 0,
-        max: 100,
         required: true
     },
-    predictionMethod: {
-        type: String,
-        default: 'Machine Learning Model'
+    probability: {
+        low: { type: Number },
+        medium: { type: Number },
+        high: { type: Number }
     },
-    predictionReason: {
+    topFactors: [{
+        feature: { type: String },
+        impact: { type: String },
+        value: { type: mongoose.Schema.Types.Mixed }
+    }],
+    recommendation: [{
         type: String,
         trim: true
-    },
-    recommendation: {
+    }],
+    modelName: {
         type: String,
-        trim: true
+        default: 'Random Forest'
+    },
+    modelVersion: {
+        type: String,
+        default: '1.0'
+    },
+    predictionTimestamp: {
+        type: Date
+    },
+    processingTime: {
+        type: Number
     }
 }, {
     timestamps: true

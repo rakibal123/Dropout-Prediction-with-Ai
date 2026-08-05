@@ -72,7 +72,26 @@ const userSchema = new mongoose.Schema({
     },
     lastLogin: {
         type: Date
-    }
+    },
+    address: { type: String, trim: true },
+    emergencyContact: { type: String, trim: true },
+    shortBio: { type: String, trim: true },
+    preferredLanguage: { type: String, default: 'English' },
+    timezone: { type: String, default: 'UTC' },
+    employeeId: { type: String, trim: true },
+    profileVisibility: { type: String, enum: ['Public', 'Institute Only', 'Private'], default: 'Institute Only' },
+    notificationPreferences: {
+        receivePredictionNotifications: { type: Boolean, default: true },
+        receiveTeacherMessages: { type: Boolean, default: true },
+        receiveEmailNotifications: { type: Boolean, default: true },
+        receiveHighRiskAlerts: { type: Boolean, default: true },
+        receiveSystemAnnouncements: { type: Boolean, default: true }
+    },
+    privacySettings: {
+        showPredictionHistory: { type: Boolean, default: true },
+        allowTeacherContact: { type: Boolean, default: true }
+    },
+    lastPasswordChange: { type: Date }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

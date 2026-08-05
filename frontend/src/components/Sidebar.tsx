@@ -17,7 +17,9 @@ import {
     ShieldCheck,
     BarChart4,
     AlertTriangle,
-    UserCheck
+    UserCheck,
+    Activity,
+    Target
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -73,18 +75,21 @@ export function Sidebar({ role }: SidebarProps) {
     const getLinks = () => {
         const common = [
             { name: "Dashboard", href: `/dashboard/${role}`, icon: LayoutDashboard },
-            { name: "Messages", href: "/messages", icon: MessageSquare },
-            { name: "Settings", href: "/settings", icon: Settings },
+            { name: "Messages", href: `/dashboard/${role}/messages`, icon: MessageSquare },
+            { name: "Settings", href: `/dashboard/${role}/settings`, icon: Settings },
+            { name: "Profile", href: `/dashboard/${role}/profile`, icon: UserCircle },
         ];
 
         const studentLinks = [
             { name: "My Progress", href: "/dashboard/student/progress", icon: BarChart4 },
+            { name: "Recommendations", href: "/dashboard/student/recommendations", icon: Target },
             { name: "Courses", href: "/dashboard/student/courses", icon: BookOpen },
             { name: "Schedule", href: "/dashboard/student/schedule", icon: Calendar },
         ];
 
         const teacherLinks = [
             { name: "My Students", href: "/dashboard/teacher/students", icon: Users },
+            { name: "Interventions", href: "/dashboard/teacher/interventions", icon: Target },
             { name: "Risk Reports", href: "/dashboard/teacher/reports", icon: AlertTriangle },
             { name: "Analytics", href: "/dashboard/teacher/analytics", icon: BarChart4 },
             { name: "Student Approvals", href: "/dashboard/teacher/approvals", icon: UserCheck },
@@ -92,8 +97,10 @@ export function Sidebar({ role }: SidebarProps) {
 
         const adminLinks = [
             { name: "Institutional Directory", href: "/dashboard/admin/users", icon: ShieldCheck },
+            { name: "Intervention Center", href: "/dashboard/admin/intervention-center", icon: Target },
+            { name: "Global Analytics", href: "/dashboard/admin/analytics", icon: BarChart4 },
             { name: "System Config", href: "/dashboard/admin/config", icon: Settings },
-            { name: "Global Reports", href: "/dashboard/admin/reports", icon: BarChart4 },
+            { name: "System Health", href: "/dashboard/admin/system-health", icon: Activity },
         ];
 
         if (role === "student") return [...common.slice(0, 1), ...studentLinks, ...common.slice(1)];
