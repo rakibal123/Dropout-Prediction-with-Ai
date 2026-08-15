@@ -94,7 +94,7 @@ export default function ReportsPage() {
                                     <Button variant="outline" size="sm" onClick={() => handleExportCSV(report.title)}>
                                         <Download className="mr-2 h-4 w-4" /> Excel
                                     </Button>
-                                    <Button variant="default" size="sm" onClick={handleExportPDF}>
+                                    <Button variant="primary" size="sm" onClick={handleExportPDF}>
                                         <FileText className="mr-2 h-4 w-4" /> PDF
                                     </Button>
                                 </CardContent>

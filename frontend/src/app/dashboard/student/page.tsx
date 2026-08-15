@@ -94,6 +94,11 @@ export default function StudentDashboard() {
         } catch (err: any) {
             console.error("Dashboard fetch error:", err);
             setError("Could not load real-time data. " + (err.message || "Network Error"));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <DashboardLayout role="student">

@@ -367,7 +367,7 @@ export default function PredictionHistoryPage() {
                                                 <FileText className="h-12 w-12 text-primary/20 mb-3" />
                                                 <h3 className="text-lg font-medium text-foreground mb-1">No prediction history found.</h3>
                                                 <p className="text-sm max-w-sm mb-4">You haven't completed any risk assessments matching this criteria yet.</p>
-                                                <Button variant="default" onClick={() => window.location.href = '/dashboard/student/assessment'}>
+                                                <Button variant="primary" onClick={() => window.location.href = '/dashboard/student/assessment'}>
                                                     Check My Risk
                                                 </Button>
                                             </div>

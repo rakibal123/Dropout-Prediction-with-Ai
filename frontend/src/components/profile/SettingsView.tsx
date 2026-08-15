@@ -517,7 +517,7 @@ export function SettingsView() {
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" onClick={handleLogout}>Logout Current</Button>
-                                    <Button variant="destructive" onClick={handleLogoutAll}>Logout All Other Devices</Button>
+                                    <Button variant="danger" onClick={handleLogoutAll}>Logout All Other Devices</Button>
                                 </div>
                             </div>
                             

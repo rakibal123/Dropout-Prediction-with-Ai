@@ -158,7 +158,7 @@ export function TimelineView() {
                             className="w-full pl-9 pr-4 py-2 bg-secondary border-none rounded-md text-sm outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
-                    <Button variant="outline" size="icon" onClick={() => setOrder(order === "desc" ? "asc" : "desc")}>
+                    <Button variant="outline" size="sm" onClick={() => setOrder(order === "desc" ? "asc" : "desc")}>
                         <ArrowDownUp className="w-4 h-4" />
                     </Button>
                 </div>

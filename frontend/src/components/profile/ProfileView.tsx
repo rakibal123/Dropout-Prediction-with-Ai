@@ -176,7 +176,7 @@ export function ProfileView() {
                             <div className="text-center p-4 bg-secondary/30 rounded-lg">
                                 <p className="text-sm text-muted-foreground mb-1">Keep track of your risk assessments in the Dashboard tab.</p>
                                 <Link href="/dashboard/student/prediction-history">
-                                    <Button variant="link" className="px-0">View Prediction History</Button>
+                                    <Button variant="ghost" className="px-0 text-primary hover:bg-transparent hover:underline">View Prediction History</Button>
                                 </Link>
                             </div>
                         </div>

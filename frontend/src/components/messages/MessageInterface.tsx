@@ -312,7 +312,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
                                     maxLength={1000}
                                     className="flex-1 bg-secondary rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
                                 />
-                                <Button type="submit" size="icon" disabled={!newMessage.trim()} className="rounded-full shrink-0">
+                                <Button type="submit" size="sm" disabled={!newMessage.trim()} className="rounded-full shrink-0">
                                     <Send className="w-4 h-4" />
                                 </Button>
                             </form>
