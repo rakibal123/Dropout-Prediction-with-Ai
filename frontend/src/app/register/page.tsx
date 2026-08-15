@@ -12,6 +12,7 @@ import { useToast } from "@/context/ToastContext";
 export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [role, setRole] = useState("student");
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -356,9 +357,19 @@ export default function RegisterPage() {
                         </div>
                         <h3 className="text-2xl font-bold mb-2">Registration Successful</h3>
                         <p className="text-muted-foreground text-sm mb-6">
-                            Your account request has been submitted successfully.
-                            <br /><br />
-                            Please wait until a Teacher or Admin approves your account. You will be able to log in after approval.
+                            {role === 'admin' ? (
+                                <>
+                                    Your admin account has been created and approved automatically.
+                                    <br /><br />
+                                    You can now log in to access the system.
+                                </>
+                            ) : (
+                                <>
+                                    Your account request has been submitted successfully.
+                                    <br /><br />
+                                    Please wait until an Admin approves your account. You will be able to log in after approval.
+                                </>
+                            )}
                         </p>
                         <Button 
                             className="w-full"

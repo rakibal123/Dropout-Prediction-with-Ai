@@ -5,7 +5,7 @@ import {
     LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar
 } from "recharts";
 import { Loader2, Server, Database, Brain, Activity, Clock, Users, HardDrive, Cpu, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export function SystemHealthView() {
     const [health, setHealth] = useState<any>(null);

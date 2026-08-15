@@ -53,24 +53,20 @@ const getMessages = async (conversationId, userId, role) => {
 };
 
 const sendMessage = async (senderId, senderRole, receiverId, text) => {
-    if (senderRole === 'admin') {
-        throw new AppError("Admins cannot send messages, only view", 403);
-    }
-    
     const receiver = await User.findById(receiverId);
     if (!receiver) {
         throw new AppError("Receiver not found", 404);
     }
     
     let studentId, teacherId;
-    if (senderRole === 'student' && receiver.role === 'teacher') {
+    if (senderRole === 'student' && (receiver.role === 'teacher' || receiver.role === 'admin')) {
         studentId = senderId;
         teacherId = receiverId;
-    } else if (senderRole === 'teacher' && receiver.role === 'student') {
+    } else if ((senderRole === 'teacher' || senderRole === 'admin') && receiver.role === 'student') {
         studentId = receiverId;
         teacherId = senderId;
     } else {
-        throw new AppError("Messaging is only allowed between students and teachers", 400);
+        throw new AppError("Messaging is only allowed between students and teachers/admins", 400);
     }
     
     let conversation = await Conversation.findOne({
@@ -103,9 +99,6 @@ const sendMessage = async (senderId, senderRole, receiverId, text) => {
 };
 
 const markAsRead = async (messageId, userId, role) => {
-    if (role === 'admin') {
-        throw new AppError("Admins cannot mark messages as read", 403);
-    }
     
     const message = await Message.findById(messageId);
     if (!message) {
@@ -122,9 +115,19 @@ const markAsRead = async (messageId, userId, role) => {
     return message;
 };
 
+const getContacts = async (userId, role) => {
+    if (role === 'student') {
+        return await User.find({ role: { $in: ['teacher', 'admin'] } }).select('name email role profilePhoto department');
+    } else if (role === 'teacher' || role === 'admin') {
+        return await User.find({ role: 'student' }).select('name email role profilePhoto department');
+    }
+    return [];
+};
+
 module.exports = {
     getConversations,
     getMessages,
     sendMessage,
-    markAsRead
+    markAsRead,
+    getContacts
 };

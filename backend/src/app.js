@@ -21,18 +21,7 @@ const app = express();
 // 1. Security HTTP Headers
 app.use(helmet());
 
-// 1.5 Global Rate Limiting
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes.' }
-});
-
-if (process.env.NODE_ENV !== 'test') {
-    app.use('/api', globalLimiter);
-}
-
-// 2. CORS Policy Configuration
+// 1.5 CORS Policy Configuration
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true,
@@ -40,6 +29,17 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use(cors(corsOptions));
+
+// 1.6 Global Rate Limiting
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+
+if (process.env.NODE_ENV === 'production') {
+    app.use('/api', globalLimiter);
+}
 
 // 3. HTTP Request Logging (Morgan)
 if (process.env.NODE_ENV === 'development') {

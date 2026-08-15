@@ -27,9 +27,9 @@ export function Navbar() {
 
     const navLinks = [
         { name: "Home", href: "/" },
-        { name: "Features", href: "#features" },
-        { name: "About", href: "#about" },
-        { name: "Contact", href: "#contact" },
+        { name: "Features", href: "/#features" },
+        { name: "About", href: "/#about" },
+        { name: "Contact", href: "/#contact" },
     ];
 
     return (
@@ -51,7 +51,7 @@ export function Navbar() {
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
-                                    href={link.name === "Contact" ? "/contact" : link.href}
+                                    href={link.href}
                                     className="rounded-md px-3 py-2 text-base font-semibold text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     {link.name}
@@ -99,7 +99,7 @@ export function Navbar() {
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
-                                    href={link.name === "Contact" ? "/contact" : link.href}
+                                    href={link.href}
                                     className="block rounded-md px-3 py-2 text-lg font-bold text-muted-foreground hover:bg-accent hover:text-primary"
                                     onClick={() => setIsOpen(false)}
                                 >

@@ -88,12 +88,8 @@ const getSystemHealth = async () => {
         accuracy: '96.2%'
     };
 
-    // 8. Error Logs (Mocked recent errors)
-    const systemLogs = [
-        { type: 'ML Error', message: 'Timeout waiting for FastAPI response', timestamp: new Date(Date.now() - 3600000).toISOString() },
-        { type: 'Auth Error', message: 'Invalid JWT signature detected', timestamp: new Date(Date.now() - 7200000).toISOString() },
-        { type: 'DB Warning', message: 'Slow query on PredictionHistory detected', timestamp: new Date(Date.now() - 86400000).toISOString() }
-    ];
+    // 8. Error Logs (Mocked recent errors removed for clarity)
+    const systemLogs = [];
 
     return {
         status: {

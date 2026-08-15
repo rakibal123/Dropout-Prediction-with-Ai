@@ -1,6 +1,6 @@
 const User = require('../models/User');
 
-const registerStudent = async (userData) => {
+const registerUser = async (userData) => {
     // Check if email already exists
     const existingUser = await User.findOne({ email: userData.email });
     if (existingUser) {
@@ -29,14 +29,17 @@ const registerStudent = async (userData) => {
         }
     }
 
+    const role = userData.role || 'student';
+    const isAutoApproved = role === 'admin';
+
     // Create the user
     const newUser = await User.create({
         fullName: userData.fullName,
         email: userData.email,
         password: userData.password,
-        role: 'student',
-        status: 'pending',
-        approved: false,
+        role: role,
+        status: isAutoApproved ? 'approved' : 'pending',
+        approved: isAutoApproved,
         isActive: true,
         lastLogin: null,
         profileImage: '',
@@ -68,8 +71,8 @@ const loginUser = async (email, password) => {
     }
 
     // 3. Role-based checks
-    if (user.role === 'student') {
-        if (user.status === 'pending') {
+    if (user.role !== 'admin') {
+        if (user.status === 'pending' || !user.approved) {
             const error = new Error('Your account is waiting for approval.');
             error.statusCode = 403;
             throw error;
@@ -89,6 +92,6 @@ const loginUser = async (email, password) => {
 };
 
 module.exports = {
-    registerStudent,
+    registerUser,
     loginUser
 };

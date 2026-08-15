@@ -22,9 +22,15 @@ const markAsRead = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, data: message });
 });
 
+const getContacts = asyncHandler(async (req, res) => {
+    const contacts = await messageService.getContacts(req.user.id, req.user.role);
+    res.status(200).json({ success: true, data: contacts });
+});
+
 module.exports = {
     getConversations,
     getMessages,
     sendMessage,
-    markAsRead
+    markAsRead,
+    getContacts
 };

@@ -5,6 +5,7 @@ const verifyToken = require('../middleware/verifyToken');
 
 router.use(verifyToken);
 
+router.get('/contacts', messageController.getContacts);
 router.get('/conversations', messageController.getConversations);
 router.get('/:conversationId', messageController.getMessages);
 router.post('/send', messageController.sendMessage);

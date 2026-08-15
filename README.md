@@ -1,138 +1,128 @@
-# Student Dropout Risk Prediction System
+# 🎓 Student Dropout Risk Prediction System (AI-Powered)
 
-A web-based system that predicts which students are at risk of dropping out using their behavior data and machine learning.
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Defense](https://img.shields.io/badge/Academic-8th%20Semester%20CSE-orange)
 
----
+An intelligent, full-stack, AI-powered platform designed to proactively identify and mitigate student dropout risks. Developed as a final-year project for the 8th Semester Defense (Department of Computer Science and Engineering).
 
-## What does this system do?
-
-- A **student** fills out a behavior form (attendance, study hours, stress level, etc.)
-- The system runs a **machine learning model** and predicts if the student is at **Low**, **Medium**, or **High** dropout risk
-- The system explains **why** the risk was predicted (Explainable AI)
-- The system generates a **personalized action plan** for the student
-- **Teachers** and **Admins** can monitor all students and take action
+This system bridges the gap between educational administration and student well-being by utilizing **Machine Learning** to predict potential dropouts based on behavioral, academic, and psychological metrics.
 
 ---
 
-## Who can use it?
+## 🚀 Key Features
 
-| Role | What they can do |
-|---|---|
-| **Student** | Take assessments, view predictions, get recommendations, track progress |
-| **Teacher** | View student risks, send messages, add notes, monitor analytics |
-| **Admin** | Manage all users, view system health, manage the full platform |
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js, React, Tailwind CSS |
-| Backend | Node.js, Express.js |
-| Database | MongoDB |
-| Machine Learning | Python, FastAPI, Random Forest, Scikit-Learn |
-| Authentication | JWT (with Refresh Token Rotation) |
+*   **🧠 AI-Powered Risk Prediction:** Utilizes a Random Forest ML model (via FastAPI) to classify students into Low, Medium, or High dropout risk categories.
+*   **🔍 Explainable AI (XAI):** Doesn't just predict, but *explains* why a student is at risk (e.g., low attendance, high stress).
+*   **👥 Multi-Role Access Control:** 
+    *   **Students:** Take assessments, view their personalized risk reports, and receive AI-generated action plans.
+    *   **Teachers:** Monitor student analytics, identify at-risk individuals, and initiate communication.
+    *   **Admins:** Oversee system health, manage users, and moderate the platform.
+*   **💬 Real-Time Communication:** Built-in messaging interface for teachers and students to interact directly within the platform.
+*   **📊 Comprehensive Dashboards:** Beautiful, interactive dashboards built with Next.js and Tailwind CSS for data visualization.
+*   **🐳 Production-Ready:** Fully dockerized for seamless deployment and scalability.
 
 ---
 
-## Project Structure
+## 🛠️ Technology Stack
 
-```
-/
-├── frontend/       → Next.js web app (UI)
-├── backend/        → Node.js API server
-├── ml-service/     → Python ML prediction service (FastAPI)
-├── docs/           → Project documentation
-├── scripts/        → Utility scripts (database backup, etc.)
-└── docker-compose.yml
-```
+**Frontend (Client-Side)**
+*   **Framework:** Next.js (React)
+*   **Styling:** Tailwind CSS
+*   **State Management & Data Fetching:** React Hooks, Axios
 
----
+**Backend (Server-Side)**
+*   **Runtime:** Node.js
+*   **Framework:** Express.js
+*   **Authentication:** JWT (JSON Web Tokens) with Refresh Token Rotation
+*   **Real-time:** Socket.io (for messaging)
 
-## How to Run Locally
+**Machine Learning (AI Service)**
+*   **Framework:** FastAPI (Python)
+*   **Libraries:** Scikit-Learn, Pandas, NumPy
+*   **Model:** Random Forest Classifier
 
-### Step 1 — ML Service
-```bash
-cd ml-service
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python training/preprocessing.py
-python training/train_models.py
-python main.py
-```
-Runs on: http://localhost:8000
-
-### Step 2 — Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-Runs on: http://localhost:5000
-
-### Step 3 — Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Runs on: http://localhost:3000
+**Database & DevOps**
+*   **Database:** MongoDB
+*   **Containerization:** Docker & Docker Compose
+*   **API Testing:** Postman
 
 ---
 
-## Run with Docker (Easier)
+## 🏗️ System Architecture & Workflow
+
+1.  **Data Collection:** Students submit self-assessment forms covering academic and behavioral metrics.
+2.  **API Gateway:** The Node.js backend receives the data and securely forwards it to the Python ML microservice.
+3.  **Prediction Engine:** The ML model analyzes the data, calculates the risk probability, and determines the contributing factors.
+4.  **Actionable Insights:** The frontend dashboard visualizes the prediction and provides a personalized, AI-driven action plan for the student and alerts the assigned teacher.
+
+---
+
+## 🚦 Getting Started (Local Development)
+
+### Prerequisites
+*   Node.js (v18+)
+*   Python (3.9+)
+*   MongoDB (Local or Atlas)
+*   Docker (Optional, but recommended)
+
+### The Easy Way (Docker)
 
 ```bash
+# Clone the repository
+git clone git@github.com:rakibal123/Dropout-Prediction-with-Ai.git
+cd Dropout-Prediction-with-Ai
+
+# Start all microservices automatically
 docker-compose up --build
 ```
+*Frontend: http://localhost:3000 | Backend: http://localhost:5000 | ML Service: http://localhost:8000 | Mongo Express: http://localhost:8081*
 
-That's it. All three services start automatically.
+### The Manual Way
 
----
-
-## Environment Variables
-
-Copy the example files and fill in your values:
-
+**1. Machine Learning Service**
 ```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+cd ml-service
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
 ```
 
-Required for backend:
-```
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-JWT_REFRESH_SECRET=your_refresh_secret_key
-```
-
----
-
-## Running Tests
-
+**2. Backend (Node.js)**
 ```bash
 cd backend
-npm test
+cp .env.example .env # Configure your MongoDB URI and JWT secrets
+npm install
+npm run dev
 ```
 
-All integration tests will run automatically using an in-memory database.
+**3. Frontend (Next.js)**
+```bash
+cd frontend
+cp .env.example .env # Point NEXT_PUBLIC_API_URL to the backend
+npm install
+npm run dev
+```
 
 ---
 
-## Documentation
+## 📚 Documentation
 
-All docs are in the `/docs` folder:
-- `User_Manual.md` — How to use the system
-- `Technical_Documentation.md` — API and architecture details
-- `Research_Documentation.md` — ML model and results
-- `postman_collection.json` — API testing collection
+Comprehensive documentation can be found in the `/docs` directory:
+*   [User Manual](./docs/User_Manual.md)
+*   [Technical Architecture](./docs/Technical_Documentation.md)
+*   [ML Research & Methodology](./docs/Research_Documentation.md)
 
 ---
 
-## Developer
+## 👨‍💻 Developer
 
-**Rakib Al Hassan**
-Department of Computer Science
-Academic Project — 2026
+**Rakib Al Hassan**  
+*Department of Computer Science & Engineering (CSE)*  
+*8th Semester Final Defense Project*  
+GitHub: [@rakibal123](https://github.com/rakibal123)
+
+---
+*Built with ❤️ for educational advancement and student retention.*

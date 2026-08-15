@@ -163,6 +163,139 @@ export default function Home() {
           </div>
         </section>
 
+        {/* About Section */}
+        <section id="about" className="py-24 relative overflow-hidden bg-slate-900/20">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/3 h-1/2 bg-primary/5 blur-[120px]" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                  <Users className="mr-2 h-4 w-4" />
+                  About Us
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
+                  Empowering Education Through <span className="text-primary italic">Data</span>
+                </h2>
+                <p className="text-lg text-slate-400 leading-relaxed">
+                  The Student Dropout Risk Prediction System (SDRPS) was built with a singular mission: to ensure no student falls through the cracks. By leveraging advanced machine learning and behavioral analytics, we provide educators with the foresight needed to intervene before it's too late.
+                </p>
+                <div className="space-y-4 pt-4">
+                  {[
+                    "Research-backed prediction models",
+                    "Privacy-first data architecture",
+                    "Dedicated to student success"
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="text-slate-300 font-medium">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 rounded-3xl blur-[40px] opacity-20 animate-pulse" />
+                <Card className="relative border-white/10 bg-slate-900/80 backdrop-blur-xl overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="grid grid-cols-2 gap-6">
+                      {[
+                        { label: "Accuracy Rate", value: "94%", icon: BrainCircuit },
+                        { label: "Students Monitored", value: "50k+", icon: Users },
+                        { label: "Institutions", value: "120+", icon: GraduationCap },
+                        { label: "Early Interventions", value: "15k+", icon: ShieldCheck },
+                      ].map((stat, i) => (
+                        <div key={i} className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors">
+                          <stat.icon className="h-6 w-6 text-primary mx-auto mb-3" />
+                          <div className="text-2xl font-bold text-white">{stat.value}</div>
+                          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section id="contact" className="py-24 relative">
+          <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-blue-600/5 blur-[120px]" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Get In Touch</h2>
+              <p className="text-slate-400 max-w-2xl mx-auto">Have questions about implementing SDRPS at your institution? We're here to help.</p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="border-white/5 bg-slate-900/40 backdrop-blur-sm lg:col-span-1">
+                <CardContent className="p-8 space-y-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-6">Contact Information</h3>
+                    <div className="space-y-6">
+                      <div className="flex items-start gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Mail className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-sm">Email Us</p>
+                          <p className="text-sm text-slate-400">support@dropoutrisk.org.bd</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Phone className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-sm">Call Us</p>
+                          <p className="text-sm text-slate-400">+8801531396247</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <MapPin className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-sm">Location</p>
+                          <p className="text-sm text-slate-400">Rohomotpur, Mymensingh, Bangladesh</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-white/5 bg-slate-900/40 backdrop-blur-sm lg:col-span-2">
+                <CardContent className="p-8">
+                  <form className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">First Name</label>
+                        <input className="flex h-12 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="John" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Last Name</label>
+                        <input className="flex h-12 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Doe" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-300">Email Address</label>
+                      <input type="email" className="flex h-12 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="john@example.com" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-300">Message</label>
+                      <textarea className="flex min-h-[120px] w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="How can we help you?" />
+                    </div>
+                    <Button type="button" className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90">
+                      Send Message
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* Call to Action */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-primary opacity-5" />

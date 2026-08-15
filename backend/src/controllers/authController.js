@@ -3,12 +3,21 @@ const asyncHandler = require('../utils/asyncHandler');
 
 const register = asyncHandler(async (req, res) => {
     try {
-        await authService.registerStudent(req.body);
+        const user = await authService.registerUser(req.body);
         
-        res.status(201).json({
-            success: true,
-            message: "Your account request has been submitted successfully. Please wait for approval by the authority."
-        });
+        if (user.role === 'admin') {
+            res.status(201).json({
+                success: true,
+                message: "Admin account created and approved successfully. You can now log in.",
+                role: user.role
+            });
+        } else {
+            res.status(201).json({
+                success: true,
+                message: "Your account request has been submitted successfully. Please wait for approval by the authority.",
+                role: user.role
+            });
+        }
     } catch (error) {
         // We handle custom errors thrown by the service
         if (error.statusCode) {
