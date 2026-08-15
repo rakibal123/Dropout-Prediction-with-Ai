@@ -57,7 +57,7 @@ export function Sidebar({ role }: SidebarProps) {
     const handleLogout = async () => {
         try {
             const token = localStorage.getItem("token");
-            await fetch("http://localhost:5000/api/auth/logout", {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/logout`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

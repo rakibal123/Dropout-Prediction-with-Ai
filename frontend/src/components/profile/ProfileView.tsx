@@ -14,7 +14,7 @@ export function ProfileView() {
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch("http://localhost:5000/api/profile", {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -49,7 +49,7 @@ export function ProfileView() {
                 <div className="h-32 bg-primary/20 absolute inset-0 -z-10"></div>
                 <div className="p-6 sm:p-10 pt-20 sm:pt-24 flex flex-col sm:flex-row items-center sm:items-end gap-6 relative z-10">
                     <img 
-                        src={profile.profileImage?.includes('http') ? profile.profileImage : `http://localhost:5000${profile.profileImage === 'default.jpg' ? '/uploads/default.png' : profile.profileImage}`} 
+                        src={profile.profileImage?.includes('http') ? profile.profileImage : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${profile.profileImage === 'default.jpg' ? '/uploads/default.png' : profile.profileImage}`} 
                         alt={profile.fullName} 
                         className="w-32 h-32 rounded-full border-4 border-card object-cover shadow-md bg-secondary"
                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profile.fullName) + '&background=random' }}

@@ -47,7 +47,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
     const fetchConversations = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/messages/conversations", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/messages/conversations`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -55,7 +55,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
                 setConversations(data.data);
             }
             
-            const contactsRes = await fetch("http://localhost:5000/api/messages/contacts", {
+            const contactsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/messages/contacts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const contactsData = await contactsRes.json();
@@ -72,7 +72,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
     const fetchMessages = async (conversationId: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:5000/api/messages/${conversationId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/messages/${conversationId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -86,7 +86,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
                     );
                     
                     for (const msg of unreadMessages) {
-                        await fetch(`http://localhost:5000/api/messages/read/${msg._id}`, {
+                        await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/messages/read/${msg._id}`, {
                             method: "PUT",
                             headers: { Authorization: `Bearer ${token}` }
                         });
@@ -113,7 +113,7 @@ export function MessageInterface({ role }: MessageInterfaceProps) {
                 (p: string) => p !== currentUser.id
             );
 
-            const res = await fetch("http://localhost:5000/api/messages/send", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/messages/send`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",

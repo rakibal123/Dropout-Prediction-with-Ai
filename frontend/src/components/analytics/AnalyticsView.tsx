@@ -33,11 +33,11 @@ export function AnalyticsView() {
             const headers = { Authorization: `Bearer ${token}` };
 
             const [overviewRes, trendsRes, insightsRes, highRiskRes, deptsRes] = await Promise.all([
-                fetch("http://localhost:5000/api/analytics/overview", { headers }),
-                fetch("http://localhost:5000/api/analytics/trends", { headers }),
-                fetch("http://localhost:5000/api/analytics/insights", { headers }),
-                fetch("http://localhost:5000/api/analytics/high-risk", { headers }),
-                fetch("http://localhost:5000/api/analytics/departments", { headers })
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/overview`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/trends`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/insights`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/high-risk`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/departments`, { headers })
             ]);
 
             const [ov, tr, ins, hr, dp] = await Promise.all([
@@ -60,7 +60,7 @@ export function AnalyticsView() {
         setIntervening(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/analytics/interventions", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/analytics/interventions`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({

@@ -32,7 +32,7 @@ export default function StudentApprovalsPage() {
             const token = localStorage.getItem("token");
             if (!token) { router.push("/login"); return; }
 
-            const res = await fetch("http://localhost:5000/api/admin/pending-students", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/pending-students`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -61,7 +61,7 @@ export default function StudentApprovalsPage() {
         setSuccessMsg(null);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:5000/api/admin/approve-student/${studentId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/approve-student/${studentId}`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -85,7 +85,7 @@ export default function StudentApprovalsPage() {
         setSuccessMsg(null);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:5000/api/admin/reject-student/${studentId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/reject-student/${studentId}`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` },
             });

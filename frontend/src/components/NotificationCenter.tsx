@@ -22,7 +22,7 @@ export function NotificationCenter() {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const res = await fetch("http://localhost:5000/api/notifications", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -59,7 +59,7 @@ export function NotificationCenter() {
     const markAsRead = async (id: string) => {
         try {
             const token = localStorage.getItem("token");
-            await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notifications/read/${id}`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -73,7 +73,7 @@ export function NotificationCenter() {
     const markAllAsRead = async () => {
         try {
             const token = localStorage.getItem("token");
-            await fetch(`http://localhost:5000/api/notifications/read-all`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notifications/read-all`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -87,7 +87,7 @@ export function NotificationCenter() {
     const deleteNotification = async (id: string) => {
         try {
             const token = localStorage.getItem("token");
-            await fetch(`http://localhost:5000/api/notifications/${id}`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notifications/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });

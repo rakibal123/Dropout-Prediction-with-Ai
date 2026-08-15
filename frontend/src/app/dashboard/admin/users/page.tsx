@@ -52,7 +52,7 @@ export default function UserManagementPage() {
                 role: roleFilter,
                 status: statusFilter
             });
-            const res = await fetch(`http://localhost:5000/api/admin/users?${queryParams}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/users?${queryParams}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -74,7 +74,7 @@ export default function UserManagementPage() {
     const viewDetails = async (userId: string) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/users/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -92,7 +92,7 @@ export default function UserManagementPage() {
         if (!confirm(`Are you sure you want to change status to ${newStatus}?`)) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/users/${userId}`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -117,7 +117,7 @@ export default function UserManagementPage() {
         if (!confirm("Are you absolutely sure you want to delete this user? This action cannot be undone.")) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

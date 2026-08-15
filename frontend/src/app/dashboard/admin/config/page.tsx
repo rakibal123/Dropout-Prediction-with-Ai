@@ -28,7 +28,7 @@ export default function ConfigPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/admin/system-logs?limit=50', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/system-logs?limit=50`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();

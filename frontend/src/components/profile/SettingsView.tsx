@@ -29,7 +29,7 @@ export function SettingsView() {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -66,7 +66,7 @@ export function SettingsView() {
     const fetchSessions = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile/sessions", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile/sessions`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -87,7 +87,7 @@ export function SettingsView() {
         setSaving(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`, {
                 method: "PUT",
                 headers: { 
                     "Content-Type": "application/json",
@@ -119,7 +119,7 @@ export function SettingsView() {
         setSaving(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile/preferences", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile/preferences`, {
                 method: "PUT",
                 headers: { 
                     "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export function SettingsView() {
             });
             
             // Wait, profileVisibility is on the main model, not inside preferences, so we should update it via PUT /profile too.
-            await fetch("http://localhost:5000/api/profile", {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ profileVisibility: formData.profileVisibility })
@@ -166,7 +166,7 @@ export function SettingsView() {
         setSaving(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile/change-password", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile/change-password`, {
                 method: "PUT",
                 headers: { 
                     "Content-Type": "application/json",
@@ -217,7 +217,7 @@ export function SettingsView() {
     const handleLogoutAll = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/profile/sessions/logout-all", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile/sessions/logout-all`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -233,7 +233,7 @@ export function SettingsView() {
     const handleDeleteSession = async (id: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:5000/api/profile/sessions/${id}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile/sessions/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -302,7 +302,7 @@ export function SettingsView() {
                             
                             <div className="flex items-center gap-6">
                                 <img 
-                                    src={profile.profileImage?.includes('http') ? profile.profileImage : `http://localhost:5000${profile.profileImage === 'default.jpg' ? '/uploads/default.png' : profile.profileImage}`} 
+                                    src={profile.profileImage?.includes('http') ? profile.profileImage : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${profile.profileImage === 'default.jpg' ? '/uploads/default.png' : profile.profileImage}`} 
                                     alt="Avatar" 
                                     className="w-24 h-24 rounded-full object-cover border-2 border-border"
                                 />
