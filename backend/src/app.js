@@ -18,6 +18,9 @@ const globalErrorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
+// Trust reverse proxy (e.g. Render/Cloudflare) so rate limiters use the real client IP
+app.set('trust proxy', 1);
+
 // 1. Security HTTP Headers
 app.use(helmet());
 
