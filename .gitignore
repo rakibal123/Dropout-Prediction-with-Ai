@@ -18,9 +18,9 @@ ml-service/venv/
 # Generated log files
 backend/logs/
 
-# ML model artifacts (large binary files - regenerate with training scripts)
-ml-service/saved_models/*.pkl
-ml-service/saved_models/*.json
+# ML model artifacts (we need to commit these so Render can use them)
+# ml-service/saved_models/*.pkl
+# ml-service/saved_models/*.json
 ml-service/processed/
 ml-service/data/
 ml-service/charts/

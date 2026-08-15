@@ -1,0 +1,10 @@
+{
+    "bestModel": "Decision Tree",
+    "accuracy": 100.0,
+    "precision": 100.0,
+    "recall": 100.0,
+    "f1Score": 100.0,
+    "cvAccuracy": 99.88,
+    "trainedAt": "2026-08-15T18:32:27Z",
+    "version": "1.0"
+}
