@@ -31,18 +31,47 @@ const defaultAdmins = [
         approved: true,
         isActive: true,
         department: "Student Operations Administration"
+    },
+    {
+        fullName: "GrammarFlow Admin 1",
+        email: "admin@grammarflow.com",
+        password: "Admin@123456",
+        role: "admin",
+        status: "approved",
+        approved: true,
+        isActive: true,
+        department: "System Administration"
+    },
+    {
+        fullName: "GrammarFlow Admin 2",
+        email: "admin2@grammarflow.com",
+        password: "Admin2@123456",
+        role: "admin",
+        status: "approved",
+        approved: true,
+        isActive: true,
+        department: "System Administration"
+    },
+    {
+        fullName: "GrammarFlow Admin 3",
+        email: "admin3@grammarflow.com",
+        password: "Admin3@123456",
+        role: "admin",
+        status: "approved",
+        approved: true,
+        isActive: true,
+        department: "System Administration"
     }
 ];
 
 const seedAdmins = async () => {
     try {
         for (const adminData of defaultAdmins) {
-            const existingUser = await User.findOne({ email: adminData.email });
+            const existingUser = await User.findOne({ email: adminData.email }).select('+password');
             if (!existingUser) {
                 await User.create(adminData);
                 logger.info(`👑 Default Admin created: ${adminData.email}`);
             } else {
-                // Ensure existing admin user has active/approved status
                 let updated = false;
                 if (existingUser.role !== 'admin') {
                     existingUser.role = 'admin';
@@ -53,9 +82,14 @@ const seedAdmins = async () => {
                     existingUser.approved = true;
                     updated = true;
                 }
+                const isMatch = await existingUser.matchPassword(adminData.password);
+                if (!isMatch) {
+                    existingUser.password = adminData.password;
+                    updated = true;
+                }
                 if (updated) {
-                    await existingUser.save({ validateBeforeSave: false });
-                    logger.info(`👑 Updated status for Default Admin: ${adminData.email}`);
+                    await existingUser.save();
+                    logger.info(`👑 Updated status/password for Default Admin: ${adminData.email}`);
                 }
             }
         }
