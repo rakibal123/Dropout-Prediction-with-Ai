@@ -145,8 +145,8 @@ export default function RegisterPage() {
                             {/* Role Selection */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium leading-none">Select Role</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {["student", "teacher", "admin"].map((r) => (
+                                <div className="grid grid-cols-2 gap-2">
+                                    {["student", "teacher"].map((r) => (
                                         <button
                                             key={r}
                                             type="button"
@@ -160,6 +160,9 @@ export default function RegisterPage() {
                                         </button>
                                     ))}
                                 </div>
+                                <p className="text-[11px] text-muted-foreground pt-1">
+                                    * Admin accounts are pre-configured in the database. Use default Admin credentials on the <Link href="/login" className="text-primary hover:underline">Sign In page</Link>.
+                                </p>
                             </div>
 
                             <div className="relative">

@@ -13,6 +13,11 @@ const connectDB = async () => {
 
     isConnected = true;
     logger.info(`🍃 MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
+    
+    // Seed default admin accounts
+    const seedAdmins = require('../utils/seedAdmins');
+    await seedAdmins();
+
     return conn;
   } catch (error) {
     isConnected = false;

@@ -30,7 +30,14 @@ const registerUser = async (userData) => {
     }
 
     const role = userData.role || 'student';
-    const isAutoApproved = role === 'admin';
+
+    if (role === 'admin') {
+        const error = new Error('Admin signup is disabled. Please sign in using one of the pre-configured default Admin accounts.');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const isAutoApproved = false;
 
     // Create the user
     const newUser = await User.create({

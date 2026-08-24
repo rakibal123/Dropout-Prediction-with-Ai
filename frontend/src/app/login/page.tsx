@@ -102,11 +102,11 @@ export default function LoginPage() {
                     </CardHeader>
                     <CardContent className="pt-6">
                         <form className="space-y-6" onSubmit={handleSubmit}>
-                            {/* Role Selection */}
+                            {/* Role Selection: Only Student & Teacher */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium leading-none">Select Role</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {["student", "teacher", "admin"].map((r) => (
+                                <div className="grid grid-cols-2 gap-2">
+                                    {["student", "teacher"].map((r) => (
                                         <button
                                             key={r}
                                             type="button"
