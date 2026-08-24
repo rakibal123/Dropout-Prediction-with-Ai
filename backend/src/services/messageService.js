@@ -4,14 +4,11 @@ const User = require('../models/User');
 const AppError = require('../utils/appError');
 
 const getConversations = async (userId, role) => {
-    let query = {};
-    if (role !== 'admin') {
-        query = { participants: userId };
-    }
-    
-    const conversations = await Conversation.find(query)
-        .populate('studentId', 'name email profilePhoto')
-        .populate('teacherId', 'name email profilePhoto department')
+    // Return all conversations where the user is a participant
+    const conversations = await Conversation.find({ participants: userId })
+        .populate('participants', 'fullName email role profileImage department')
+        .populate('studentId', 'fullName email profileImage role')
+        .populate('teacherId', 'fullName email profileImage department role')
         .sort('-updatedAt');
         
     const result = [];
@@ -41,12 +38,12 @@ const getMessages = async (conversationId, userId, role) => {
         throw new AppError("Conversation not found", 404);
     }
     
-    if (role !== 'admin' && !conversation.participants.includes(userId)) {
+    if (role !== 'admin' && !conversation.participants.some(p => p.toString() === userId.toString())) {
         throw new AppError("Unauthorized access to this conversation", 403);
     }
     
     const messages = await Message.find({ conversationId })
-        .populate('senderId', 'name role profilePhoto')
+        .populate('senderId', 'fullName role profileImage')
         .sort('createdAt');
         
     return messages;
@@ -58,15 +55,15 @@ const sendMessage = async (senderId, senderRole, receiverId, text) => {
         throw new AppError("Receiver not found", 404);
     }
     
-    let studentId, teacherId;
-    if (senderRole === 'student' && (receiver.role === 'teacher' || receiver.role === 'admin')) {
+    let studentId = senderId;
+    let teacherId = receiverId;
+    
+    if (senderRole === 'student' && receiver.role === 'teacher') {
         studentId = senderId;
         teacherId = receiverId;
-    } else if ((senderRole === 'teacher' || senderRole === 'admin') && receiver.role === 'student') {
+    } else if (senderRole === 'teacher' && receiver.role === 'student') {
         studentId = receiverId;
         teacherId = senderId;
-    } else {
-        throw new AppError("Messaging is only allowed between students and teachers/admins", 400);
     }
     
     let conversation = await Conversation.findOne({
@@ -95,11 +92,12 @@ const sendMessage = async (senderId, senderRole, receiverId, text) => {
     conversation.updatedAt = Date.now();
     await conversation.save();
     
+    await message.populate('senderId', 'fullName role profileImage');
+    
     return message;
 };
 
 const markAsRead = async (messageId, userId, role) => {
-    
     const message = await Message.findById(messageId);
     if (!message) {
         throw new AppError("Message not found", 404);
@@ -116,12 +114,26 @@ const markAsRead = async (messageId, userId, role) => {
 };
 
 const getContacts = async (userId, role) => {
+    let users = [];
     if (role === 'student') {
-        return await User.find({ role: { $in: ['teacher', 'admin'] } }).select('name email role profilePhoto department');
-    } else if (role === 'teacher' || role === 'admin') {
-        return await User.find({ role: 'student' }).select('name email role profilePhoto department');
+        users = await User.find({ _id: { $ne: userId }, role: { $in: ['teacher', 'admin'] } })
+            .select('fullName email role profileImage department');
+    } else if (role === 'teacher') {
+        users = await User.find({ _id: { $ne: userId }, role: { $in: ['student', 'admin', 'teacher'] } })
+            .select('fullName email role profileImage department');
+    } else if (role === 'admin') {
+        users = await User.find({ _id: { $ne: userId } })
+            .select('fullName email role profileImage department');
     }
-    return [];
+    
+    return users.map(u => ({
+        _id: u._id,
+        name: u.fullName || u.email,
+        email: u.email,
+        role: u.role,
+        department: u.department,
+        profilePhoto: u.profileImage && u.profileImage !== 'default.jpg' ? u.profileImage : null
+    }));
 };
 
 module.exports = {
