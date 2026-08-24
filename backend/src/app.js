@@ -63,20 +63,23 @@ app.use(mongoSanitize());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 6. Base API Router Mounting
-app.use('/api/v1', apiRouter);
+const mountApiRoutes = (prefix) => {
+    app.use(`${prefix}`, apiRouter);
+    app.use(`${prefix}/auth`, require('./routes/authRoutes'));
+    app.use(`${prefix}/student`, require('./routes/studentRoutes'));
+    app.use(`${prefix}/admin`, require('./routes/admin'));
+    app.use(`${prefix}/messages`, require('./routes/messageRoutes'));
+    app.use(`${prefix}/notifications`, require('./routes/notificationRoutes'));
+    app.use(`${prefix}/profile`, require('./routes/profileRoutes'));
+    app.use(`${prefix}/student/timeline`, require('./routes/timelineRoutes'));
+    app.use(`${prefix}/analytics`, require('./routes/analyticsRoutes'));
+    app.use(`${prefix}/admin/system-health`, require('./routes/systemHealthRoutes'));
+    app.use(`${prefix}/predictions`, require('./routes/predictionExplanationRoutes'));
+    app.use(`${prefix}/recommendations`, require('./routes/recommendationRoutes'));
+};
 
-// Legacy Route Mounts
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/student', require('./routes/studentRoutes'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/messages', require('./routes/messageRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/profile', require('./routes/profileRoutes'));
-app.use('/api/student/timeline', require('./routes/timelineRoutes'));
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
-app.use('/api/admin/system-health', require('./routes/systemHealthRoutes'));
-app.use('/api/predictions', require('./routes/predictionExplanationRoutes'));
-app.use('/api/recommendations', require('./routes/recommendationRoutes'));
+mountApiRoutes('/api');
+mountApiRoutes('/api/v1');
 
 // Base Root Route
 app.get('/', (req, res) => {

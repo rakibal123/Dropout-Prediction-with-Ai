@@ -93,6 +93,13 @@ const getUserById = async (id) => {
 };
 
 const updateUser = async (id, updateData, adminId, ipAddress) => {
+    if (updateData.status === 'approved' || updateData.status === 'active' || updateData.approved === true) {
+        updateData.status = 'approved';
+        updateData.approved = true;
+    } else if (updateData.status === 'rejected' || updateData.status === 'pending' || updateData.status === 'inactive' || updateData.approved === false) {
+        updateData.approved = false;
+    }
+
     const user = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true }).select('-password');
     if (!user) throw new AppError('User not found', 404);
     
@@ -104,6 +111,15 @@ const updateUser = async (id, updateData, adminId, ipAddress) => {
     });
     
     return user;
+};
+
+const getPendingStudents = async () => {
+    const pendingStudents = await User.find({
+        role: 'student',
+        status: 'pending'
+    }).select('-password').sort({ createdAt: -1 });
+
+    return pendingStudents;
 };
 
 const deleteUser = async (id, adminId, ipAddress) => {
@@ -236,6 +252,7 @@ module.exports = {
     getDashboardStats,
     getUsers,
     getUserById,
+    getPendingStudents,
     updateUser,
     deleteUser,
     getAnalytics,

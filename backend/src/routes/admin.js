@@ -5,8 +5,18 @@ const authorizeRoles = require('../middleware/authorizeRoles');
 
 const router = express.Router();
 
-// Apply auth and role middleware
-router.use(verifyToken, authorizeRoles('admin'));
+// Apply auth middleware
+router.use(verifyToken);
+
+// Student Approval APIs (Accessible by Admin and Teacher)
+router.get('/pending-students', authorizeRoles('admin', 'teacher'), adminController.getPendingStudents);
+router.put('/approve-student/:id', authorizeRoles('admin', 'teacher'), adminController.approveStudent);
+router.put('/reject-student/:id', authorizeRoles('admin', 'teacher'), adminController.rejectStudent);
+router.put('/users/:id/approve', authorizeRoles('admin', 'teacher'), adminController.approveStudent);
+router.put('/users/:id/reject', authorizeRoles('admin', 'teacher'), adminController.rejectStudent);
+
+// Admin-only routes below
+router.use(authorizeRoles('admin'));
 
 // Dashboard APIs
 router.get('/dashboard', adminController.getDashboard);
@@ -22,9 +32,5 @@ router.route('/users/:id')
     .get(adminController.getUserById)
     .put(adminController.updateUser)
     .delete(adminController.deleteUser);
-
-// Legacy/Explicit Student Approval APIs (if needed by frontend directly)
-router.put('/users/:id/approve', adminController.approveStudent);
-router.put('/users/:id/reject', adminController.rejectStudent);
 
 module.exports = router;

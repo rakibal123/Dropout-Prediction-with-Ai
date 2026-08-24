@@ -70,17 +70,29 @@ const loginUser = async (email, password) => {
         throw error;
     }
 
-    // 3. Role-based checks
+    // 3. Role-based checks for non-admin users (student, teacher)
     if (user.role !== 'admin') {
-        if (user.status === 'pending' || !user.approved) {
+        const isApprovedStatus = user.status === 'approved' || user.status === 'active' || user.approved === true;
+        const isRejectedStatus = user.status === 'rejected';
+
+        if (isRejectedStatus) {
+            const error = new Error('Your registration request has been rejected. Please contact the administrator.');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if (!isApprovedStatus) {
             const error = new Error('Your account is waiting for approval.');
             error.statusCode = 403;
             throw error;
         }
-        if (user.status === 'rejected') {
-            const error = new Error('Your registration request has been rejected. Please contact the administrator.');
-            error.statusCode = 403;
-            throw error;
+
+        // Heal out-of-sync fields in database so status and approved stay consistent
+        if (!user.approved || user.status !== 'approved') {
+            user.approved = true;
+            if (user.status !== 'active') {
+                user.status = 'approved';
+            }
         }
     }
 

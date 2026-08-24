@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
+        enum: ['pending', 'approved', 'rejected', 'active', 'inactive'],
         default: 'pending'
     },
     approved: {
@@ -132,6 +132,19 @@ userSchema.virtual('receivedMessages', {
     ref: 'Message',
     localField: '_id',
     foreignField: 'receiverId'
+});
+
+// Sync status and approved flag before saving
+userSchema.pre('save', function (next) {
+    if (this.isModified('status') || this.isModified('approved')) {
+        if (this.status === 'approved' || this.status === 'active' || this.approved === true) {
+            if (this.status !== 'active') this.status = 'approved';
+            this.approved = true;
+        } else if (this.status === 'pending' || this.status === 'rejected' || this.status === 'inactive' || this.approved === false) {
+            this.approved = false;
+        }
+    }
+    next();
 });
 
 // Hash password before saving

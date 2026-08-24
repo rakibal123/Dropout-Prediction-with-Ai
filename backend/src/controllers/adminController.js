@@ -48,22 +48,49 @@ const logAdminAction = async (userId, action, ipAddress) => {
     await SystemLog.create({ userId, action, ipAddress });
 };
 
-// Legacy support for approve/reject logic if still needed directly, 
-// though updateUser can handle { status: 'approved' }
+const getPendingStudents = asyncHandler(async (req, res) => {
+    const students = await adminService.getPendingStudents();
+    res.status(200).json({
+        success: true,
+        status: 'success',
+        results: students.length,
+        data: {
+            students
+        }
+    });
+});
+
 const approveStudent = asyncHandler(async (req, res) => {
-    const user = await adminService.updateUser(req.params.id, { status: 'approved' }, req.user._id, req.ip);
-    res.status(200).json({ success: true, data: user });
+    const user = await adminService.updateUser(req.params.id, { status: 'approved', approved: true }, req.user._id, req.ip);
+    res.status(200).json({
+        success: true,
+        status: 'success',
+        message: 'Student approved successfully',
+        data: {
+            student: user,
+            user
+        }
+    });
 });
 
 const rejectStudent = asyncHandler(async (req, res) => {
-    const user = await adminService.updateUser(req.params.id, { status: 'rejected' }, req.user._id, req.ip);
-    res.status(200).json({ success: true, data: user });
+    const user = await adminService.updateUser(req.params.id, { status: 'rejected', approved: false }, req.user._id, req.ip);
+    res.status(200).json({
+        success: true,
+        status: 'success',
+        message: 'Student account rejected',
+        data: {
+            student: user,
+            user
+        }
+    });
 });
 
 module.exports = {
     getDashboard,
     getUsers,
     getUserById,
+    getPendingStudents,
     updateUser,
     deleteUser,
     getAnalytics,
