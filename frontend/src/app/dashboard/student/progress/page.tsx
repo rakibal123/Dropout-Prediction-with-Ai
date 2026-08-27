@@ -58,35 +58,14 @@ export default function StudentProgressPage() {
         }
     };
 
-    const attPct = behavior?.attendancePercentage ?? 88;
-    const subPct = behavior?.assignmentSubmissionRate ?? 92;
-    const quizAvg = behavior?.quizAverage ?? 85;
-    const studyHours = behavior?.studyHoursPerWeek ?? 18;
+    const attPct = behavior?.attendancePercentage;
+    const subPct = behavior?.assignmentSubmissionRate;
+    const quizAvg = behavior?.quizAverage;
+    const studyHours = behavior?.studyHoursPerWeek;
 
-    const subjects = [
-        { name: "Machine Learning & AI", code: "CS401", score: 88, grade: "A", attendance: 94, assignments: "8/8", trend: "+3%", color: "bg-blue-500" },
-        { name: "Data Structures & Algorithms", code: "CS202", score: 82, grade: "B+", attendance: 86, assignments: "7/8", trend: "+1%", color: "bg-indigo-500" },
-        { name: "Database Management Systems", code: "CS305", score: 91, grade: "A+", attendance: 96, assignments: "9/9", trend: "+5%", color: "bg-emerald-500" },
-        { name: "Software Engineering", code: "CS310", score: 79, grade: "B", attendance: 80, assignments: "6/7", trend: "-2%", color: "bg-amber-500" },
-        { name: "Probability & Statistics", code: "MATH204", score: 85, grade: "A-", attendance: 90, assignments: "7/7", trend: "+4%", color: "bg-purple-500" },
-    ];
-
-    const milestones = [
-        { title: "Perfect Attendance Week 8", description: "Attended 100% of lectures this week", icon: Award, color: "text-amber-500 bg-amber-500/10", date: "2 days ago" },
-        { title: "Quiz Master", description: "Scored over 90% in 3 consecutive quizzes", icon: Zap, color: "text-purple-500 bg-purple-500/10", date: "1 week ago" },
-        { title: "Assignment Streak", description: "Submitted 5 assignments ahead of deadline", icon: CheckCircle2, color: "text-emerald-500 bg-emerald-500/10", date: "2 weeks ago" },
-    ];
-
-    const weeklyProgress = [
-        { week: "W1", attendance: 80, quiz: 75, submission: 85 },
-        { week: "W2", attendance: 82, quiz: 78, submission: 88 },
-        { week: "W3", attendance: 85, quiz: 80, submission: 90 },
-        { week: "W4", attendance: 84, quiz: 82, submission: 89 },
-        { week: "W5", attendance: 88, quiz: 85, submission: 91 },
-        { week: "W6", attendance: 90, quiz: 84, submission: 94 },
-        { week: "W7", attendance: 87, quiz: 88, submission: 92 },
-        { week: "W8", attendance: attPct, quiz: quizAvg, submission: subPct },
-    ];
+    const subjects: any[] = [];
+    const milestones: any[] = [];
+    const weeklyProgress: any[] = [];
 
     return (
         <DashboardLayout role="student">
@@ -122,10 +101,13 @@ export default function StudentProgressPage() {
                             <CardContent className="p-6 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cumulative GPA</p>
-                                    <h3 className="text-3xl font-black mt-1 text-foreground">3.72 <span className="text-xs font-normal text-muted-foreground">/ 4.0</span></h3>
-                                    <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs font-bold">
-                                        <ArrowUpRight className="h-3.5 w-3.5" /> Top 10% of cohort
-                                    </div>
+                                    {dashboardData?.gpa ? (
+                                        <>
+                                            <h3 className="text-3xl font-black mt-1 text-foreground">{dashboardData.gpa} <span className="text-xs font-normal text-muted-foreground">/ 4.0</span></h3>
+                                        </>
+                                    ) : (
+                                        <h3 className="text-xl font-bold mt-1 text-muted-foreground">No Data</h3>
+                                    )}
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
                                     <Award className="h-6 w-6" />
@@ -139,10 +121,11 @@ export default function StudentProgressPage() {
                             <CardContent className="p-6 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Overall Attendance</p>
-                                    <h3 className="text-3xl font-black mt-1 text-purple-400">{attPct}%</h3>
-                                    <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs font-bold">
-                                        <CheckCircle2 className="h-3.5 w-3.5" /> Above 85% requirement
-                                    </div>
+                                    {attPct !== undefined ? (
+                                        <h3 className="text-3xl font-black mt-1 text-purple-400">{attPct}%</h3>
+                                    ) : (
+                                        <h3 className="text-xl font-bold mt-1 text-muted-foreground">No Data</h3>
+                                    )}
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
                                     <Clock className="h-6 w-6" />
@@ -156,10 +139,11 @@ export default function StudentProgressPage() {
                             <CardContent className="p-6 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Assignments Submitted</p>
-                                    <h3 className="text-3xl font-black mt-1 text-blue-400">{subPct}%</h3>
-                                    <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs font-bold">
-                                        <ArrowUpRight className="h-3.5 w-3.5" /> 37/40 tasks completed
-                                    </div>
+                                    {subPct !== undefined ? (
+                                        <h3 className="text-3xl font-black mt-1 text-blue-400">{subPct}%</h3>
+                                    ) : (
+                                        <h3 className="text-xl font-bold mt-1 text-muted-foreground">No Data</h3>
+                                    )}
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
                                     <BookOpen className="h-6 w-6" />
@@ -173,10 +157,11 @@ export default function StudentProgressPage() {
                             <CardContent className="p-6 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Weekly Study Time</p>
-                                    <h3 className="text-3xl font-black mt-1 text-amber-400">{studyHours} <span className="text-xs font-normal text-muted-foreground">hrs/wk</span></h3>
-                                    <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs font-bold">
-                                        <Zap className="h-3.5 w-3.5" /> Optimal study pace
-                                    </div>
+                                    {studyHours !== undefined ? (
+                                        <h3 className="text-3xl font-black mt-1 text-amber-400">{studyHours} <span className="text-xs font-normal text-muted-foreground">hrs/wk</span></h3>
+                                    ) : (
+                                        <h3 className="text-xl font-bold mt-1 text-muted-foreground">No Data</h3>
+                                    )}
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
                                     <BarChart4 className="h-6 w-6" />
@@ -200,59 +185,67 @@ export default function StudentProgressPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="text-xs text-muted-foreground uppercase bg-secondary/20 border-b border-border">
-                                        <tr>
-                                            <th className="px-6 py-3 font-semibold">Course</th>
-                                            <th className="px-6 py-3 font-semibold">Overall Grade</th>
-                                            <th className="px-6 py-3 font-semibold">Attendance</th>
-                                            <th className="px-6 py-3 font-semibold">Assignments</th>
-                                            <th className="px-6 py-3 font-semibold">Trend</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/60">
-                                        {subjects.map((s, idx) => (
-                                            <tr key={idx} className="hover:bg-secondary/10 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`h-3 w-3 rounded-full ${s.color}`} />
-                                                        <div>
-                                                            <p className="font-semibold text-foreground">{s.name}</p>
-                                                            <p className="text-xs text-muted-foreground">{s.code}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-foreground">{s.score}%</span>
-                                                        <span className="px-2 py-0.5 rounded text-xs font-bold bg-primary/10 text-primary">{s.grade}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="w-24">
-                                                        <div className="flex justify-between text-xs mb-1 font-medium">
-                                                            <span>{s.attendance}%</span>
-                                                        </div>
-                                                        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                                                            <div className={`h-full ${s.attendance >= 85 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${s.attendance}%` }} />
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-xs font-medium text-foreground">
-                                                    {s.assignments}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`flex items-center gap-1 text-xs font-bold ${s.trend.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                        {s.trend.startsWith('+') ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                                                        {s.trend}
-                                                    </span>
-                                                </td>
+                            {subjects.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
+                                    <BookOpen className="h-12 w-12 mb-3 opacity-20" />
+                                    <p className="font-medium">No academic results available yet.</p>
+                                    <p className="text-xs mt-1">Your subject-wise performance will appear here once records are available.</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="text-xs text-muted-foreground uppercase bg-secondary/20 border-b border-border">
+                                            <tr>
+                                                <th className="px-6 py-3 font-semibold">Course</th>
+                                                <th className="px-6 py-3 font-semibold">Overall Grade</th>
+                                                <th className="px-6 py-3 font-semibold">Attendance</th>
+                                                <th className="px-6 py-3 font-semibold">Assignments</th>
+                                                <th className="px-6 py-3 font-semibold">Trend</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/60">
+                                            {subjects.map((s, idx) => (
+                                                <tr key={idx} className="hover:bg-secondary/10 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`h-3 w-3 rounded-full ${s.color}`} />
+                                                            <div>
+                                                                <p className="font-semibold text-foreground">{s.name}</p>
+                                                                <p className="text-xs text-muted-foreground">{s.code}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-foreground">{s.score}%</span>
+                                                            <span className="px-2 py-0.5 rounded text-xs font-bold bg-primary/10 text-primary">{s.grade}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="w-24">
+                                                            <div className="flex justify-between text-xs mb-1 font-medium">
+                                                                <span>{s.attendance}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                                <div className={`h-full ${s.attendance >= 85 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${s.attendance}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-xs font-medium text-foreground">
+                                                        {s.assignments}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`flex items-center gap-1 text-xs font-bold ${s.trend.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                            {s.trend.startsWith('+') ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+                                                            {s.trend}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -265,24 +258,31 @@ export default function StudentProgressPage() {
                             <CardDescription>Academic badges and milestone achievements</CardDescription>
                         </CardHeader>
                         <CardContent className="p-6 space-y-4 flex-1">
-                            {milestones.map((m, i) => (
-                                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-colors border border-border/40">
-                                    <div className={`p-2.5 rounded-xl ${m.color} shrink-0`}>
-                                        <m.icon className="h-5 w-5" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-start">
-                                            <h4 className="font-semibold text-sm text-foreground">{m.title}</h4>
-                                            <span className="text-[10px] text-muted-foreground font-medium">{m.date}</span>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>
-                                    </div>
+                            {milestones.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground h-full">
+                                    <Award className="h-10 w-10 mb-2 opacity-20" />
+                                    <p className="text-sm font-medium">No milestones reached yet.</p>
                                 </div>
-                            ))}
+                            ) : (
+                                milestones.map((m, i) => (
+                                    <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-colors border border-border/40">
+                                        <div className={`p-2.5 rounded-xl ${m.color} shrink-0`}>
+                                            <m.icon className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="font-semibold text-sm text-foreground">{m.title}</h4>
+                                                <span className="text-[10px] text-muted-foreground font-medium">{m.date}</span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </CardContent>
                         <div className="p-4 border-t border-border">
-                            <Button variant="outline" className="w-full text-xs" onClick={() => showToast("Badge catalog feature coming soon!", "info")}>
-                                View All 14 Earned Badges <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                            <Button variant="outline" className="w-full text-xs" onClick={() => showToast("Badge catalog feature coming soon!", "info")} disabled={milestones.length === 0}>
+                                View All Earned Badges <ChevronRight className="h-3.5 w-3.5 ml-1" />
                             </Button>
                         </div>
                     </Card>
@@ -297,42 +297,50 @@ export default function StudentProgressPage() {
                         <CardDescription>Tracking week-over-week attendance, quiz averages, and assignment completion rates</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                            {weeklyProgress.map((w, idx) => (
-                                <div key={idx} className="flex flex-col items-center p-3 rounded-xl bg-secondary/20 border border-border/40 hover:border-primary/40 transition-all">
-                                    <span className="text-xs font-bold uppercase text-muted-foreground mb-3">{w.week}</span>
-                                    <div className="w-full space-y-2">
-                                        <div>
-                                            <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
-                                                <span>Att</span>
-                                                <span className="text-purple-400 font-bold">{w.attendance}%</span>
+                        {weeklyProgress.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
+                                <TrendingUp className="h-10 w-10 mb-3 opacity-20" />
+                                <p className="font-medium text-sm">No progression data available yet.</p>
+                                <p className="text-xs mt-1">Weekly trends will appear after your first few weeks.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                                {weeklyProgress.map((w, idx) => (
+                                    <div key={idx} className="flex flex-col items-center p-3 rounded-xl bg-secondary/20 border border-border/40 hover:border-primary/40 transition-all">
+                                        <span className="text-xs font-bold uppercase text-muted-foreground mb-3">{w.week}</span>
+                                        <div className="w-full space-y-2">
+                                            <div>
+                                                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
+                                                    <span>Att</span>
+                                                    <span className="text-purple-400 font-bold">{w.attendance}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                    <div className="h-full bg-purple-500" style={{ width: `${w.attendance}%` }} />
+                                                </div>
                                             </div>
-                                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                                                <div className="h-full bg-purple-500" style={{ width: `${w.attendance}%` }} />
+                                            <div>
+                                                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
+                                                    <span>Quiz</span>
+                                                    <span className="text-amber-400 font-bold">{w.quiz}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                    <div className="h-full bg-amber-500" style={{ width: `${w.quiz}%` }} />
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
-                                                <span>Quiz</span>
-                                                <span className="text-amber-400 font-bold">{w.quiz}%</span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                                                <div className="h-full bg-amber-500" style={{ width: `${w.quiz}%` }} />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
-                                                <span>Sub</span>
-                                                <span className="text-blue-400 font-bold">{w.submission}%</span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                                                <div className="h-full bg-blue-500" style={{ width: `${w.submission}%` }} />
+                                            <div>
+                                                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-medium">
+                                                    <span>Sub</span>
+                                                    <span className="text-blue-400 font-bold">{w.submission}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blue-500" style={{ width: `${w.submission}%` }} />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

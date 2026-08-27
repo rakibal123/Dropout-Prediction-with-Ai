@@ -40,9 +40,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    semester: {
-        type: String,
-        trim: true
+    currentSemester: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Semester',
+        index: true
     },
     rollNumber: {
         type: String,

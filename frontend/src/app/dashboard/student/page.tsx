@@ -38,6 +38,7 @@ export default function StudentDashboard() {
     const [dashboardData, setDashboardData] = useState<any>(null);
     const [prediction, setPrediction] = useState<PredictionResult | null>(null);
     const [behavior, setBehavior] = useState<any>(null);
+    const [courses, setCourses] = useState<any[]>([]);
     
     const [error, setError] = useState<string | null>(null);
     const { showToast } = useToast();
@@ -67,10 +68,11 @@ export default function StudentDashboard() {
 
             const headers = { "Authorization": `Bearer ${token}` };
 
-            const [dashRes, predRes, behavRes] = await Promise.all([
+            const [dashRes, predRes, behavRes, coursesRes] = await Promise.all([
                 fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/dashboard`, { headers }),
                 fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predictions/latest`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/behavior/latest`, { headers })
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/behavior/latest`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/courses`, { headers })
             ]);
 
             if (!dashRes.ok) throw new Error("Failed to load dashboard data");
@@ -78,9 +80,13 @@ export default function StudentDashboard() {
             const dashData = await dashRes.json();
             const predData = await predRes.json();
             const behavData = await behavRes.json();
+            const coursesData = await coursesRes.json();
 
             setDashboardData(dashData.data);
             setBehavior(behavData.data);
+            if (coursesData.data && coursesData.data.courses) {
+                setCourses(coursesData.data.courses);
+            }
 
             if (predData.data) {
                 setPrediction({
@@ -113,47 +119,53 @@ export default function StudentDashboard() {
     const firstName = dashboardData?.fullName ? dashboardData.fullName.split(" ")[0] : (user?.name ? user.name.split(" ")[0] : "Student");
     
     // Use real behavior data if available
-    const attPct = behavior?.attendancePercentage || 0;
-    const subPct = behavior?.assignmentSubmissionRate || 0;
-    const quizAvg = behavior?.quizAverage || 0;
+    const hasBehaviorData = !!behavior;
+    const attPct = behavior?.attendancePercentage;
+    const subPct = behavior?.assignmentSubmissionRate;
+    const quizAvg = behavior?.quizAverage;
 
     const stats = [
         {
             label: "Attendance",
-            value: `${attPct}%`,
+            value: hasBehaviorData && attPct !== undefined ? `${attPct}%` : "No Data",
             icon: Clock,
             color: "text-purple-600",
             bg: "bg-purple-100"
         },
         {
             label: "Submissions",
-            value: `${subPct}%`,
+            value: hasBehaviorData && subPct !== undefined ? `${subPct}%` : "No Data",
             icon: BookOpen,
             color: "text-blue-600",
             bg: "bg-blue-100"
         },
         {
             label: "Quiz Avg",
-            value: `${quizAvg}`,
+            value: hasBehaviorData && quizAvg !== undefined ? `${quizAvg}` : "No Data",
             icon: Zap,
             color: "text-orange-600",
             bg: "bg-orange-100"
         },
         {
             label: "Risk Level",
-            value: prediction?.riskLevel || "Safe",
+            value: prediction?.riskLevel || "N/A",
             icon: ShieldCheck,
-            color: prediction?.riskLevel === 'High' ? "text-red-600" : (prediction?.riskLevel === 'Medium' ? "text-yellow-600" : "text-green-600"),
-            bg: prediction?.riskLevel === 'High' ? "bg-red-100" : (prediction?.riskLevel === 'Medium' ? "bg-yellow-100" : "bg-green-100")
+            color: prediction?.riskLevel === 'High' ? "text-red-600" : (prediction?.riskLevel === 'Medium' ? "text-yellow-600" : (prediction?.riskLevel === 'Low' ? "text-green-600" : "text-muted-foreground")),
+            bg: prediction?.riskLevel === 'High' ? "bg-red-100" : (prediction?.riskLevel === 'Medium' ? "bg-yellow-100" : (prediction?.riskLevel === 'Low' ? "bg-green-100" : "bg-secondary"))
         },
     ];
 
-    const performanceData = [45, 52, 48, 70, 65, 85, 90, 88];
-    const riskData = [
-        { label: "Low", value: prediction ? (prediction.riskLevel === 'Low' ? 80 : 10) : 65, color: "bg-risk-low" },
-        { label: "Medium", value: prediction ? (prediction.riskLevel === 'Medium' ? 70 : 20) : 25, color: "bg-risk-medium" },
-        { label: "High", value: prediction ? (prediction.riskLevel === 'High' ? 85 : 5) : 10, color: "bg-risk-high" },
-    ];
+    // Placeholder for actual performance data from backend (currently none exists)
+    const performanceData: number[] = [];
+    
+    let riskData: { label: string; value: number; color: string }[] = [];
+    if (prediction) {
+        riskData = [
+            { label: "Low", value: prediction.riskLevel === 'Low' ? 80 : 10, color: "bg-risk-low" },
+            { label: "Medium", value: prediction.riskLevel === 'Medium' ? 70 : 20, color: "bg-risk-medium" },
+            { label: "High", value: prediction.riskLevel === 'High' ? 85 : 5, color: "bg-risk-high" },
+        ];
+    }
 
     return (
         <DashboardLayout role="student">
@@ -224,52 +236,61 @@ export default function StudentDashboard() {
                     <Card className="lg:col-span-2 border-none shadow-md overflow-hidden">
                         <CardHeader className="bg-card pb-0">
                             <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg">Performance Trend</CardTitle>
+                                <CardTitle className="text-lg">Course-Wise Risk</CardTitle>
                                 <div className="flex gap-2">
                                     <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary text-[10px] font-bold">
-                                        <div className="h-2 w-2 rounded-full bg-primary" />
-                                        Score
+                                        Data Coverage: {courses.length > 0 ? Math.round((courses.filter(c => c.dataStatus === 'Available').length / courses.length) * 100) : 0}%
                                     </div>
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-8 h-64 relative flex items-end justify-between gap-1 overflow-hidden">
-                            <svg className="absolute inset-0 h-full w-full pointer-events-none px-8 py-12" viewBox="0 0 800 200" preserveAspectRatio="none">
-                                <path
-                                    d={`M ${performanceData.map((h, i) => `${(i / (performanceData.length - 1)) * 800},${200 - (h / 100) * 200}`).join(" L ")}`}
-                                    fill="none"
-                                    stroke="var(--color-primary)"
-                                    strokeWidth="4"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="opacity-20 translate-y-2"
-                                />
-                                <motion.path
-                                    initial={{ pathLength: 0 }}
-                                    animate={{ pathLength: 1 }}
-                                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                                    d={`M ${performanceData.map((h, i) => `${(i / (performanceData.length - 1)) * 800},${200 - (h / 100) * 200}`).join(" L ")}`}
-                                    fill="none"
-                                    stroke="var(--color-primary)"
-                                    strokeWidth="3"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                                {performanceData.map((h, i) => (
-                                    <circle
-                                        key={i}
-                                        cx={(i / (performanceData.length - 1)) * 800}
-                                        cy={200 - (h / 100) * 200}
-                                        r="4"
-                                        fill="var(--color-primary)"
-                                    />
-                                ))}
-                            </svg>
-                            <div className="absolute bottom-4 left-8 right-8 flex justify-between">
-                                {performanceData.map((_, i) => (
-                                    <p key={i} className="text-[10px] text-muted-foreground font-medium uppercase">W{i + 1}</p>
-                                ))}
-                            </div>
+                        <CardContent className="p-4 overflow-x-auto">
+                            {courses.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground bg-card/50">
+                                    <BookOpen className="h-10 w-10 mb-3 opacity-20" />
+                                    <p className="font-medium text-sm">No courses found.</p>
+                                    <p className="text-xs max-w-xs mt-1">Please select your current semester in academic settings.</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse min-w-[500px]">
+                                    <thead>
+                                        <tr className="border-b border-border bg-secondary/30">
+                                            <th className="p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Course</th>
+                                            <th className="p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Teacher</th>
+                                            <th className="p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Data Status</th>
+                                            <th className="p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Risk Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border">
+                                        {courses.map(c => (
+                                            <tr key={c._id} className="hover:bg-secondary/10 transition-colors">
+                                                <td className="p-3">
+                                                    <p className="font-bold text-sm">{c.name}</p>
+                                                    <p className="text-[10px] font-mono text-muted-foreground">{c.code}</p>
+                                                </td>
+                                                <td className="p-3 text-sm">{c.teacher ? c.teacher.fullName : 'Not Assigned'}</td>
+                                                <td className="p-3">
+                                                    {c.dataStatus === 'Available' ? (
+                                                        <span className="text-[10px] font-bold px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded">Available</span>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold px-2 py-1 bg-amber-500/10 text-amber-600 rounded">Pending</span>
+                                                    )}
+                                                </td>
+                                                <td className="p-3 text-right">
+                                                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                                                        c.risk === 'High' ? 'bg-red-500/10 text-red-600' :
+                                                        c.risk === 'Medium' ? 'bg-amber-500/10 text-amber-600' :
+                                                        c.risk === 'Low' ? 'bg-emerald-500/10 text-emerald-600' :
+                                                        'bg-secondary text-muted-foreground'
+                                                    }`}>
+                                                        {c.risk}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -278,83 +299,32 @@ export default function StudentDashboard() {
                             <CardTitle className="text-lg">Risk Distribution</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center justify-center pt-2">
-                            <div className="relative h-48 w-48 mb-6">
-                                <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        fill="transparent"
-                                        stroke="var(--color-risk-high)"
-                                        strokeWidth="20"
-                                        strokeDasharray="251.2"
-                                        strokeDashoffset="0"
-                                        className="opacity-20"
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        fill="transparent"
-                                        stroke="var(--color-risk-low)"
-                                        strokeWidth="20"
-                                        strokeDasharray={`${(riskData[0].value / 100) * 251.2} 251.2`}
-                                        strokeDashoffset="0"
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        fill="transparent"
-                                        stroke="var(--color-risk-medium)"
-                                        strokeWidth="20"
-                                        strokeDasharray={`${(riskData[1].value / 100) * 251.2} 251.2`}
-                                        strokeDashoffset={`${-(riskData[0].value / 100) * 251.2}`}
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        fill="transparent"
-                                        stroke="var(--color-risk-high)"
-                                        strokeWidth="20"
-                                        strokeDasharray={`${(riskData[2].value / 100) * 251.2} 251.2`}
-                                        strokeDashoffset={`${-((riskData[0].value + riskData[1].value) / 100) * 251.2}`}
-                                    />
-                                </svg>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <p className="text-2xl font-bold">100%</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Total</p>
+                            {courses.length === 0 || courses.filter(c => c.dataStatus === 'Available').length === 0 ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-muted-foreground bg-card/50 backdrop-blur-sm z-10">
+                                    <ShieldCheck className="h-10 w-10 mb-3 opacity-20" />
+                                    <p className="font-medium text-sm">Prediction unavailable.</p>
+                                    <p className="text-xs max-w-xs mt-1">Teachers need to upload data for your courses.</p>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-1 w-full gap-2">
-                                {riskData.map((item) => (
-                                    <div key={item.label} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/50">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
-                                            <span className="text-xs font-semibold">{item.label} Risk</span>
+                            ) : (
+                                <>
+                                    <div className="grid grid-cols-1 w-full gap-2 mt-4">
+                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-700">
+                                            <span className="text-xs font-bold">Low Risk</span>
+                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Low').length} Courses</span>
                                         </div>
-                                        <span className="text-xs font-bold">{item.value}%</span>
+                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/10 text-amber-700">
+                                            <span className="text-xs font-bold">Medium Risk</span>
+                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Medium').length} Courses</span>
+                                        </div>
+                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-red-500/10 text-red-700">
+                                            <span className="text-xs font-bold">High Risk</span>
+                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'High').length} Courses</span>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
-                </div>
-
-                <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center gap-2 bg-green-500/10 text-green-600 px-3 py-1 rounded-full text-xs font-bold border border-green-500/20">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                        Low Risk (Safe)
-                    </div>
-                    <div className="flex items-center gap-2 bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/20">
-                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                        Medium Risk (Monitor)
-                    </div>
-                    <div className="flex items-center gap-2 bg-red-500/10 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20">
-                        <div className="h-2 w-2 rounded-full bg-red-500" />
-                        High Risk (At Risk)
-                    </div>
                 </div>
 
                 {!prediction ? (

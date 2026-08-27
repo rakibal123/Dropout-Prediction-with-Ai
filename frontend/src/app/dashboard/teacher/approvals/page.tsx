@@ -7,10 +7,10 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 
 interface PendingStudent {
     _id: string;
-    name: string;
+    fullName: string;
     email: string;
-    roll_number?: string;
-    registration_number?: string;
+    rollNumber?: string;
+    registrationNumber?: string;
     department?: string;
     createdAt: string;
     status: "pending" | "approved" | "rejected";
@@ -104,8 +104,10 @@ export default function StudentApprovalsPage() {
         }
     };
 
-    const getInitials = (name: string) =>
-        name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+    const getInitials = (name: string) => {
+        if (!name) return "??";
+        return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+    };
 
     const formatDate = (dateStr: string) =>
         new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
@@ -192,20 +194,20 @@ export default function StudentApprovalsPage() {
                                     {/* Student info */}
                                     <div className="flex items-center gap-4">
                                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-                                            {getInitials(student.name)}
+                                            {getInitials(student.fullName)}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-foreground">{student.name}</p>
+                                            <p className="text-sm font-semibold text-foreground">{student.fullName}</p>
                                             <p className="text-xs text-muted-foreground">{student.email}</p>
                                             <div className="flex flex-wrap gap-2 mt-1.5">
-                                                {student.roll_number && (
+                                                {student.rollNumber && (
                                                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">
-                                                        Roll: {student.roll_number}
+                                                        Roll: {student.rollNumber}
                                                     </span>
                                                 )}
-                                                {student.registration_number && (
+                                                {student.registrationNumber && (
                                                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">
-                                                        Reg: {student.registration_number}
+                                                        Reg: {student.registrationNumber}
                                                     </span>
                                                 )}
                                                 {student.department && (

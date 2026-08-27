@@ -18,6 +18,10 @@ const connectDB = async () => {
     const seedAdmins = require('../utils/seedAdmins');
     await seedAdmins();
 
+    // Seed Academic Data
+    const seedAcademicData = require('../utils/seedAcademicData');
+    await seedAcademicData();
+
     return conn;
   } catch (error) {
     isConnected = false;

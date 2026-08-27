@@ -8,10 +8,8 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
-    GraduationCap,
     BookOpen,
     Calendar,
-    Bell,
     MessageSquare,
     Users,
     ShieldCheck,
@@ -44,6 +42,17 @@ export function Sidebar({ role }: SidebarProps) {
                 console.error(e);
             }
         }
+
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setIsCollapsed(true);
+            } else {
+                setIsCollapsed(false);
+            }
+        };
+        handleResize(); // Initialize on mount
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const userName = localUser?.name || "User";
@@ -113,17 +122,10 @@ export function Sidebar({ role }: SidebarProps) {
     return (
         <aside
             className={cn(
-                "relative h-screen border-r border-border bg-card transition-all duration-300 flex flex-col",
+                "relative h-full border-r border-border bg-card transition-all duration-300 flex flex-col",
                 isCollapsed ? "w-20" : "w-64"
             )}
         >
-            <div className="flex h-16 items-center px-6">
-                <Link href="/" className="flex items-center gap-3 overflow-hidden">
-                    <GraduationCap className="h-8 w-8 text-primary shrink-0" />
-                    {!isCollapsed && <span className="font-bold text-lg whitespace-nowrap">DropoutRisk</span>}
-                </Link>
-            </div>
-
             <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
                 {links.map((link) => {
                     const isActive = pathname === link.href;
@@ -132,8 +134,10 @@ export function Sidebar({ role }: SidebarProps) {
                             key={link.name}
                             href={link.href}
                             className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-secondary",
-                                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-secondary",
+                                isActive 
+                                    ? "bg-primary/15 text-primary border-l-4 border-primary font-bold shadow-sm" 
+                                    : "text-muted-foreground hover:text-foreground font-medium border-l-4 border-transparent",
                                 isCollapsed && "justify-center px-0"
                             )}
                             title={isCollapsed ? link.name : ""}
@@ -176,7 +180,7 @@ export function Sidebar({ role }: SidebarProps) {
 
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-20 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-secondary md:flex"
+                className="absolute -right-3 top-6 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-secondary md:flex z-50"
             >
                 {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, GraduationCap } from "lucide-react";
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +11,10 @@ export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState("/");
+    const pathname = usePathname();
+
+    const isDashboard = pathname.startsWith("/dashboard");
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -22,8 +27,24 @@ export function Navbar() {
             } catch (e) {
                 console.error("Error parsing user from localStorage:", e);
             }
+        } else {
+            setIsLoggedIn(false);
+            setUserRole(null);
         }
-    }, []);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setActiveSection(window.location.pathname + window.location.hash);
+        }
+        const handleHashChange = () => {
+            if (typeof window !== "undefined") {
+                setActiveSection(window.location.pathname + window.location.hash);
+            }
+        };
+        window.addEventListener("hashchange", handleHashChange);
+        return () => window.removeEventListener("hashchange", handleHashChange);
+    }, [pathname]);
 
     const navLinks = [
         { name: "Home", href: "/" },
@@ -32,8 +53,10 @@ export function Navbar() {
         { name: "Contact", href: "/#contact" },
     ];
 
+    if (isDashboard) return null;
+
     return (
-        <nav className="z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+        <nav className="sticky top-0 z-[100] w-full border-b border-border bg-background/80 backdrop-blur-md">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
                     <div className="flex items-center">
@@ -48,15 +71,26 @@ export function Navbar() {
                     {/* Desktop Nav */}
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-6">
-                            {navLinks.map((link) => (
+                            {navLinks.map((link) => {
+                                const isActive = activeSection === link.href || (link.href === "/" && activeSection === "/");
+                                return (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className="rounded-md px-3 py-2 text-base font-semibold text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={() => setActiveSection(link.href)}
+                                    className={`relative px-3 py-2 text-base font-semibold transition-all duration-300 ease-out ${
+                                        isActive 
+                                            ? "text-primary" 
+                                            : "text-muted-foreground hover:text-foreground"
+                                    }`}
                                 >
                                     {link.name}
+                                    <span className={`absolute left-2 -bottom-1 w-[calc(100%-1rem)] h-[1.5px] bg-primary transition-transform duration-300 ease-out origin-center ${
+                                        isActive ? "scale-x-100" : "scale-x-0"
+                                    }`} />
                                 </Link>
-                            ))}
+                                );
+                            })}
                             {isLoggedIn ? (
                                 <Link href={`/dashboard/${userRole || "student"}`}>
                                     <Button className="ml-4">Dashboard</Button>
@@ -96,16 +130,24 @@ export function Navbar() {
                         className="md:hidden border-b border-border bg-background"
                     >
                         <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-                            {navLinks.map((link) => (
+                            {navLinks.map((link) => {
+                                const isActive = activeSection === link.href || (link.href === "/" && activeSection === "/");
+                                return (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className="block rounded-md px-3 py-2 text-lg font-bold text-muted-foreground hover:bg-accent hover:text-primary"
-                                    onClick={() => setIsOpen(false)}
+                                    className={`block rounded-md px-3 py-2 text-lg font-bold hover:bg-accent transition-colors ${
+                                        isActive ? "text-primary border-l-4 border-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                    onClick={() => {
+                                        setActiveSection(link.href);
+                                        setIsOpen(false);
+                                    }}
                                 >
                                     {link.name}
                                 </Link>
-                            ))}
+                                );
+                            })}
                             {isLoggedIn ? (
                                 <Link href={`/dashboard/${userRole || "student"}`} onClick={() => setIsOpen(false)}>
                                     <Button className="w-full">Dashboard</Button>

@@ -4,7 +4,7 @@ const PredictionHistory = require('../models/PredictionHistory');
 const BehaviorRecord = require('../models/BehaviorRecord');
 
 const getStudentDashboard = async (userId) => {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).populate('currentSemester');
     const profile = await StudentProfile.findOne({ userId });
     const latestPrediction = await PredictionHistory.findOne({ studentId: userId }).sort({ createdAt: -1 });
     const predictionCount = await PredictionHistory.countDocuments({ studentId: userId });
@@ -14,7 +14,7 @@ const getStudentDashboard = async (userId) => {
         rollNumber: user.rollNumber,
         registrationNumber: user.registrationNumber,
         department: user.department,
-        semester: user.semester,
+        semester: user.currentSemester ? user.currentSemester.name : null,
         profileImage: user.profileImage,
         currentCGPA: profile ? profile.currentCGPA : null,
         currentRiskLevel: latestPrediction ? latestPrediction.riskLevel : null,

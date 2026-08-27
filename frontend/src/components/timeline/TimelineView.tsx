@@ -171,7 +171,7 @@ export function TimelineView() {
                 {sortedAndFilteredEvents.length === 0 ? (
                     <div className="text-center py-20 text-muted-foreground relative z-10 bg-background/80 backdrop-blur-sm rounded-xl">
                         <Clock className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <p>No academic journey available yet.</p>
+                        <p>No events in your timeline yet.</p>
                     </div>
                 ) : (
                     <div className="space-y-8 relative z-10">

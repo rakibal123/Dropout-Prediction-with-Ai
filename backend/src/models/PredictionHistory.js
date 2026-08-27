@@ -10,7 +10,16 @@ const predictionHistorySchema = new mongoose.Schema({
     behaviorRecordId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BehaviorRecord',
-        required: true,
+        index: true
+    },
+    courseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        index: true
+    },
+    semesterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Semester',
         index: true
     },
     finalScore: {

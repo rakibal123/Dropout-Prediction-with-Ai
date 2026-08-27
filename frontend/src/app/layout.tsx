@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 
 import { ToastProvider } from "@/context/ToastContext";
+import { Navbar } from "@/components/Navbar";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -20,10 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${outfit.variable} font-outfit antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.variable} font-outfit antialiased`} suppressHydrationWarning>
         <ToastProvider>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex-1">
+              {children}
+            </div>
+          </div>
         </ToastProvider>
       </body>
     </html>

@@ -135,7 +135,74 @@ const predictPreview = async (behaviorData) => {
     };
 };
 
+const predictForCourse = async (courseStudentDataId) => {
+    const CourseStudentData = require('../models/CourseStudentData');
+    const courseData = await CourseStudentData.findById(courseStudentDataId);
+    if (!courseData) {
+        throw new AppError("Course student data not found", 404);
+    }
+
+    // Map course data to ML payload
+    const mlPayload = {
+        attendancePercentage: courseData.attendancePercentage || 0,
+        assignmentSubmissionRate: courseData.assignmentSubmissionRate || 0,
+        quizAverage: courseData.quizAverage || 0,
+        midtermMarks: courseData.midtermMarks || 0,
+        studyHoursPerWeek: courseData.studyHoursPerWeek || 0,
+        engagementScore: courseData.classEngagement || 0,
+        // Since we don't have loginFrequency in courseData exactly, we might default to 5 or extract from somewhere else
+        loginFrequency: 5,
+        participationScore: courseData.participationInActivities || 0,
+        stressLevel: 5, // Default or placeholder
+        motivationLevel: 5 // Default or placeholder
+    };
+
+    const mlResponse = await fetchMLPrediction(mlPayload);
+
+    if (!mlResponse.success) {
+        throw new AppError("ML Prediction failed internally.", 500);
+    }
+
+    const predictionData = mlResponse.prediction;
+    const explanationData = mlResponse.explanation;
+    const modelData = mlResponse.model;
+    const metadata = mlResponse.metadata;
+
+    // Update the course data with the risk
+    courseData.courseRiskLevel = predictionData.riskLevel;
+    courseData.courseRiskProbability = predictionData.probability.high || predictionData.confidence;
+    await courseData.save();
+
+    // Create PredictionHistory for course
+    const predictionHistory = new PredictionHistory({
+        studentId: courseData.studentId,
+        courseId: courseData.courseId,
+        semesterId: courseData.semesterId,
+        riskLevel: predictionData.riskLevel,
+        finalScore: predictionData.finalScore,
+        confidence: predictionData.confidence,
+        probability: predictionData.probability,
+        topFactors: explanationData.topFactors,
+        recommendation: mlResponse.recommendation,
+        modelName: modelData.name,
+        modelVersion: modelData.version,
+        predictionTimestamp: new Date(metadata.predictionTimestamp),
+        processingTime: metadata.processingTimeMs
+    });
+
+    await predictionHistory.save();
+
+    // Asynchronously generate recommendations
+    const recommendationService = require('./recommendationService');
+    recommendationService.generateRecommendation(predictionHistory._id).catch(err => {
+        logger.error(`Failed to generate async recommendation: ${err.message}`);
+    });
+
+    return courseData;
+};
+
 module.exports = {
     predict,
-    predictPreview
+    predictPreview,
+    predictForCourse
 };

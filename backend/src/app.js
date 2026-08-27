@@ -74,6 +74,8 @@ const mountApiRoutes = (prefix) => {
     app.use(`${prefix}/student/timeline`, require('./routes/timelineRoutes'));
     app.use(`${prefix}/analytics`, require('./routes/analyticsRoutes'));
     app.use(`${prefix}/admin/system-health`, require('./routes/systemHealthRoutes'));
+    app.use(`${prefix}/teacher`, require('./routes/teacherRoutes'));
+    app.use(`${prefix}/academic`, require('./routes/academicRoutes'));
     app.use(`${prefix}/predictions`, require('./routes/predictionExplanationRoutes'));
     app.use(`${prefix}/recommendations`, require('./routes/recommendationRoutes'));
 };

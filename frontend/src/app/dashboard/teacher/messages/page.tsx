@@ -1,13 +1,16 @@
 import { MessageInterface } from "@/components/messages/MessageInterface";
+import { DashboardLayout } from "@/components/DashboardLayout";
 
 export default function TeacherMessagesPage() {
     return (
-        <div className="p-6">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-                <p className="text-muted-foreground mt-1">Communicate with your students and monitor their progress.</p>
+        <DashboardLayout role="teacher">
+            <div className="p-6">
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
+                    <p className="text-muted-foreground mt-1">Communicate with your students and monitor their progress.</p>
+                </div>
+                <MessageInterface role="teacher" />
             </div>
-            <MessageInterface role="teacher" />
-        </div>
+        </DashboardLayout>
     );
 }

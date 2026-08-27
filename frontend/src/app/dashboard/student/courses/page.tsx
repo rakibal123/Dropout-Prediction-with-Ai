@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
     BookOpen, User, Clock, MapPin, Calendar, CheckCircle2, 
     FileText, Search, ExternalLink, MessageSquare, AlertCircle, ChevronRight, Download
@@ -35,130 +35,26 @@ export default function StudentCoursesPage() {
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const { showToast } = useToast();
 
-    const courses: Course[] = [
-        {
-            id: "1",
-            code: "CS401",
-            title: "Machine Learning & AI",
-            instructor: "Dr. Sarah Jenkins",
-            instructorEmail: "s.jenkins@university.edu",
-            credits: 4,
-            room: "Lab 302, Science Bldg",
-            schedule: "Mon, Wed 10:00 AM - 11:30 AM",
-            progress: 75,
-            grade: "A",
-            category: "Computer Science",
-            description: "Supervised and unsupervised learning, neural networks, decision trees, reinforcement learning, and explainable AI paradigms.",
-            syllabus: [
-                { week: 1, topic: "Introduction to AI & Data Pipelines", status: "Completed" },
-                { week: 2, topic: "Linear & Logistic Regression", status: "Completed" },
-                { week: 3, topic: "Decision Trees & Random Forests", status: "Completed" },
-                { week: 4, topic: "Neural Networks & Deep Learning", status: "In Progress" },
-                { week: 5, topic: "Explainable AI & Model Interpretability", status: "Upcoming" },
-            ],
-            upcomingAssignments: [
-                { title: "Lab 4: Neural Net Implementation", dueDate: "Aug 28, 2026", type: "Assignment" },
-                { title: "Mid-Term Project Proposal", dueDate: "Sep 05, 2026", type: "Project" },
-            ]
-        },
-        {
-            id: "2",
-            code: "CS202",
-            title: "Data Structures & Algorithms",
-            instructor: "Prof. Alan Vance",
-            instructorEmail: "a.vance@university.edu",
-            credits: 4,
-            room: "Lecture Hall B",
-            schedule: "Tue, Thu 01:00 PM - 02:30 PM",
-            progress: 68,
-            grade: "B+",
-            category: "Computer Science",
-            description: "Advanced data structures, graphs, dynamic programming, sorting/searching optimization, and complexity analysis.",
-            syllabus: [
-                { week: 1, topic: "Arrays, Linked Lists, & Complexity", status: "Completed" },
-                { week: 2, topic: "Stacks, Queues, and Trees", status: "Completed" },
-                { week: 3, topic: "Binary Search Trees & Heaps", status: "Completed" },
-                { week: 4, topic: "Graph Algorithms & BFS/DFS", status: "In Progress" },
-                { week: 5, topic: "Dynamic Programming Foundations", status: "Upcoming" },
-            ],
-            upcomingAssignments: [
-                { title: "Assignment 3: Graph Traversal", dueDate: "Aug 30, 2026", type: "Assignment" },
-                { title: "Quiz 2: BST and AVL Trees", dueDate: "Sep 02, 2026", type: "Quiz" },
-            ]
-        },
-        {
-            id: "3",
-            code: "CS305",
-            title: "Database Management Systems",
-            instructor: "Dr. Maria Torres",
-            instructorEmail: "m.torres@university.edu",
-            credits: 3,
-            room: "Room 105, IT Block",
-            schedule: "Mon, Fri 02:00 PM - 03:30 PM",
-            progress: 82,
-            grade: "A+",
-            category: "Computer Science",
-            description: "Relational database design, SQL querying, indexing, transaction processing, and NoSQL databases.",
-            syllabus: [
-                { week: 1, topic: "ER Modeling & Normalization", status: "Completed" },
-                { week: 2, topic: "Relational Algebra & SQL Basics", status: "Completed" },
-                { week: 3, topic: "Advanced SQL & Joins", status: "Completed" },
-                { week: 4, topic: "Indexing & B+ Trees", status: "In Progress" },
-                { week: 5, topic: "MongoDB & Document Stores", status: "Upcoming" },
-            ],
-            upcomingAssignments: [
-                { title: "SQL Optimization Workshop", dueDate: "Sep 01, 2026", type: "Assignment" },
-            ]
-        },
-        {
-            id: "4",
-            code: "MATH204",
-            title: "Probability & Statistics",
-            instructor: "Prof. Robert Zhang",
-            instructorEmail: "r.zhang@university.edu",
-            credits: 3,
-            room: "Math Annex 201",
-            schedule: "Wed, Fri 09:00 AM - 10:30 AM",
-            progress: 70,
-            grade: "A-",
-            category: "Mathematics",
-            description: "Probability theory, random variables, hypothesis testing, regression analysis, and Bayesian inference.",
-            syllabus: [
-                { week: 1, topic: "Axioms of Probability", status: "Completed" },
-                { week: 2, topic: "Discrete & Continuous Distributions", status: "Completed" },
-                { week: 3, topic: "Expectation & Variance", status: "Completed" },
-                { week: 4, topic: "Central Limit Theorem", status: "In Progress" },
-                { week: 5, topic: "Hypothesis Testing & p-values", status: "Upcoming" },
-            ],
-            upcomingAssignments: [
-                { title: "Problem Set 4: Hypothesis Testing", dueDate: "Sep 04, 2026", type: "Assignment" },
-            ]
-        },
-        {
-            id: "5",
-            code: "CS310",
-            title: "Software Engineering",
-            instructor: "Dr. Emily Carter",
-            instructorEmail: "e.carter@university.edu",
-            credits: 3,
-            room: "Auditorium 1",
-            schedule: "Tue, Thu 10:00 AM - 11:30 AM",
-            progress: 60,
-            grade: "B",
-            category: "Computer Science",
-            description: "Agile methodologies, software architecture patterns, CI/CD, unit testing, and collaborative team development.",
-            syllabus: [
-                { week: 1, topic: "Software Life Cycle & Agile", status: "Completed" },
-                { week: 2, topic: "Requirements Engineering", status: "Completed" },
-                { week: 3, topic: "System Design & UML", status: "Completed" },
-                { week: 4, topic: "Git Flow & CI/CD Pipelines", status: "In Progress" },
-                { week: 5, topic: "Automated Testing Frameworks", status: "Upcoming" },
-            ],
-            upcomingAssignments: [
-                { title: "Sprint 2 Code Review", dueDate: "Aug 29, 2026", type: "Project" },
-            ]
-        }
-    ];
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch actual courses from API if implemented in the future
+        // For now, it represents an empty state as there are no courses in the database
+        const fetchCourses = async () => {
+            try {
+                // Simulated API call structure
+                // const res = await fetch('/api/student/courses');
+                // const data = await res.json();
+                // setCourses(data);
+            } catch (error) {
+                console.error("Error fetching courses", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCourses();
+    }, []);
 
     const filteredCourses = courses.filter(c => {
         const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.code.toLowerCase().includes(searchQuery.toLowerCase()) || c.instructor.toLowerCase().includes(searchQuery.toLowerCase());
@@ -199,79 +95,91 @@ export default function StudentCoursesPage() {
                 </div>
 
                 {/* Course Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredCourses.map((course, index) => (
-                        <motion.div
-                            key={course.id}
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                        >
-                            <Card className="border-none shadow-premium bg-card flex flex-col justify-between h-full hover:shadow-2xl transition-all duration-300 group overflow-hidden border border-border/40 hover:border-primary/40">
-                                <div>
-                                    <div className="bg-gradient-to-r from-primary/10 to-transparent p-5 border-b border-border/60 relative">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-primary text-white">{course.code}</span>
-                                            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                                                Grade: {course.grade}
-                                            </span>
-                                        </div>
-                                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">{course.title}</h3>
-                                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
-                                            <User className="h-3.5 w-3.5 text-primary shrink-0" /> {course.instructor}
-                                        </p>
-                                    </div>
-
-                                    <CardContent className="p-5 space-y-4">
-                                        <p className="text-xs text-muted-foreground line-clamp-2">{course.description}</p>
-
-                                        <div className="space-y-1.5">
-                                            <div className="flex justify-between text-xs font-medium">
-                                                <span className="text-muted-foreground">Syllabus Completion</span>
-                                                <span className="font-bold text-foreground">{course.progress}%</span>
+                {isLoading ? (
+                    <div className="flex justify-center p-12 text-muted-foreground">Loading...</div>
+                ) : courses.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center border rounded-xl border-dashed bg-card/30">
+                        <BookOpen className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                        <h3 className="text-xl font-bold text-foreground mb-2">No courses assigned yet</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">You haven't been assigned to any courses for the current semester. Please check back later or contact your advisor.</p>
+                    </div>
+                ) : filteredCourses.length === 0 ? (
+                    <div className="flex justify-center p-12 text-muted-foreground">No courses match your search.</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredCourses.map((course, index) => (
+                            <motion.div
+                                key={course.id}
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <Card className="border-none shadow-premium bg-card flex flex-col justify-between h-full hover:shadow-2xl transition-all duration-300 group overflow-hidden border border-border/40 hover:border-primary/40">
+                                    <div>
+                                        <div className="bg-gradient-to-r from-primary/10 to-transparent p-5 border-b border-border/60 relative">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-primary text-white">{course.code}</span>
+                                                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                    Grade: {course.grade}
+                                                </span>
                                             </div>
-                                            <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                                <div className="h-full bg-primary rounded-full" style={{ width: `${course.progress}%` }} />
-                                            </div>
+                                            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">{course.title}</h3>
+                                            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                                                <User className="h-3.5 w-3.5 text-primary shrink-0" /> {course.instructor}
+                                            </p>
                                         </div>
 
-                                        <div className="space-y-2 pt-2 border-t border-border/60 text-xs text-muted-foreground">
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                                                <span className="truncate">{course.schedule}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                                                <span className="truncate">{course.room}</span>
-                                            </div>
-                                        </div>
+                                        <CardContent className="p-5 space-y-4">
+                                            <p className="text-xs text-muted-foreground line-clamp-2">{course.description}</p>
 
-                                        {course.upcomingAssignments.length > 0 && (
-                                            <div className="p-2.5 rounded-lg bg-secondary/30 border border-border/40">
-                                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Next Pending Task</p>
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="font-medium text-foreground truncate max-w-[170px]">{course.upcomingAssignments[0].title}</span>
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded">
-                                                        {course.upcomingAssignments[0].dueDate}
-                                                    </span>
+                                            <div className="space-y-1.5">
+                                                <div className="flex justify-between text-xs font-medium">
+                                                    <span className="text-muted-foreground">Syllabus Completion</span>
+                                                    <span className="font-bold text-foreground">{course.progress}%</span>
+                                                </div>
+                                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                                    <div className="h-full bg-primary rounded-full" style={{ width: `${course.progress}%` }} />
                                                 </div>
                                             </div>
-                                        )}
-                                    </CardContent>
-                                </div>
 
-                                <div className="p-4 border-t border-border bg-card/50 flex gap-2">
-                                    <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setSelectedCourse(course)}>
-                                        <BookOpen className="h-3.5 w-3.5 mr-1" /> View Syllabus
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/10" onClick={() => window.location.href = `/dashboard/student/messages`}>
-                                        <MessageSquare className="h-3.5 w-3.5" />
-                                    </Button>
-                                </div>
-                            </Card>
-                        </motion.div>
-                    ))}
-                </div>
+                                            <div className="space-y-2 pt-2 border-t border-border/60 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                                                    <span className="truncate">{course.schedule}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                                    <span className="truncate">{course.room}</span>
+                                                </div>
+                                            </div>
+
+                                            {course.upcomingAssignments.length > 0 && (
+                                                <div className="p-2.5 rounded-lg bg-secondary/30 border border-border/40">
+                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Next Pending Task</p>
+                                                    <div className="flex justify-between items-center text-xs">
+                                                        <span className="font-medium text-foreground truncate max-w-[170px]">{course.upcomingAssignments[0].title}</span>
+                                                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded">
+                                                            {course.upcomingAssignments[0].dueDate}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </div>
+
+                                    <div className="p-4 border-t border-border bg-card/50 flex gap-2">
+                                        <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setSelectedCourse(course)}>
+                                            <BookOpen className="h-3.5 w-3.5 mr-1" /> View Syllabus
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/10" onClick={() => window.location.href = `/dashboard/student/messages`}>
+                                            <MessageSquare className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Course Details & Syllabus Modal */}
                 <AnimatePresence>
@@ -333,15 +241,19 @@ export default function StudentCoursesPage() {
                                     <Calendar className="h-4 w-4 text-primary" /> Upcoming Deadlines
                                 </h3>
                                 <div className="space-y-2 mb-6">
-                                    {selectedCourse.upcomingAssignments.map((a, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/10 border border-border/40 text-xs">
-                                            <div className="flex items-center gap-3">
-                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">{a.type}</span>
-                                                <span className="font-medium text-foreground">{a.title}</span>
+                                    {selectedCourse.upcomingAssignments.length === 0 ? (
+                                        <p className="text-xs text-muted-foreground italic p-3 bg-secondary/10 rounded-lg border border-border/40">No upcoming assignments.</p>
+                                    ) : (
+                                        selectedCourse.upcomingAssignments.map((a, i) => (
+                                            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/10 border border-border/40 text-xs">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">{a.type}</span>
+                                                    <span className="font-medium text-foreground">{a.title}</span>
+                                                </div>
+                                                <span className="text-amber-400 font-bold">{a.dueDate}</span>
                                             </div>
-                                            <span className="text-amber-400 font-bold">{a.dueDate}</span>
-                                        </div>
-                                    ))}
+                                        ))
+                                    )}
                                 </div>
 
                                 <div className="flex justify-end gap-2 pt-4 border-t border-border">

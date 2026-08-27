@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/Navbar";
+
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -23,10 +23,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col font-outfit bg-background text-foreground">
-      <Navbar />
-
-      <main className="flex-1">
+    <div className="flex flex-col font-outfit bg-background text-foreground">      <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-background py-16 lg:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
