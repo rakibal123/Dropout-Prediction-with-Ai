@@ -32,10 +32,71 @@ export default function StudentSchedulePage() {
     const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Simulated fetch for real API integration later
-    useState(() => {
-        setIsLoading(false);
-    });
+    useEffect(() => {
+        const fetchCoursesAndSchedule = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/student/courses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (data.success && data.courses && data.courses.length > 0) {
+                    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
+                    const colors = [
+                        "border-l-blue-500 bg-blue-500/10",
+                        "border-l-purple-500 bg-purple-500/10",
+                        "border-l-emerald-500 bg-emerald-500/10",
+                        "border-l-amber-500 bg-amber-500/10",
+                        "border-l-pink-500 bg-pink-500/10"
+                    ];
+                    
+                    const generatedSchedule: ScheduleItem[] = [];
+                    data.courses.forEach((c: any, index: number) => {
+                        // Assign deterministic days/times based on index to distribute them across the week
+                        const dayIndex = index % days.length;
+                        const timeSlot = index % 2 === 0 ? "09:00 AM - 10:30 AM" : "11:00 AM - 12:30 PM";
+                        const isLab = c.code.toLowerCase().includes('lab') || c.name.toLowerCase().includes('lab');
+                        
+                        generatedSchedule.push({
+                            id: c._id,
+                            day: days[dayIndex],
+                            time: timeSlot,
+                            code: c.code,
+                            title: c.name,
+                            instructor: c.teacher?.fullName || 'TBA',
+                            room: isLab ? `Lab 30${index + 1}` : `Room 40${index + 1}`,
+                            type: isLab ? "Lab" : "Lecture",
+                            color: colors[index % colors.length]
+                        });
+                        
+                        // Add a second slot for theory courses later in the week
+                        if (!isLab) {
+                            const secondDayIndex = (dayIndex + 2) % days.length;
+                            generatedSchedule.push({
+                                id: c._id + '_2',
+                                day: days[secondDayIndex],
+                                time: index % 2 === 0 ? "01:00 PM - 02:30 PM" : "03:00 PM - 04:30 PM",
+                                code: c.code,
+                                title: c.name,
+                                instructor: c.teacher?.fullName || 'TBA',
+                                room: `Room 40${index + 1}`,
+                                type: "Lecture",
+                                color: colors[index % colors.length]
+                            });
+                        }
+                    });
+                    
+                    setTimetable(generatedSchedule);
+                }
+            } catch (err) {
+                console.error("Failed to load schedule", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCoursesAndSchedule();
+    }, []);
 
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 

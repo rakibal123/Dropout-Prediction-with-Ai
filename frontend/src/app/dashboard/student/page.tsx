@@ -118,40 +118,47 @@ export default function StudentDashboard() {
 
     const firstName = dashboardData?.fullName ? dashboardData.fullName.split(" ")[0] : (user?.name ? user.name.split(" ")[0] : "Student");
     
-    // Use real behavior data if available
-    const hasBehaviorData = !!behavior;
-    const attPct = behavior?.attendancePercentage;
-    const subPct = behavior?.assignmentSubmissionRate;
-    const quizAvg = behavior?.quizAverage;
+    const totalCourses = courses.length;
+    const coursesAssessed = courses.filter(c => c.dataStatus === 'Available').length;
+    const pendingCourses = totalCourses - coursesAssessed;
+    const coverage = totalCourses > 0 ? Math.round((coursesAssessed / totalCourses) * 100) : 0;
+    
+    // Overall risk based on available courses
+    let overallRisk = 'No Data';
+    if (coursesAssessed > 0) {
+        const hasHigh = courses.some(c => c.risk === 'High');
+        const hasMedium = courses.some(c => c.risk === 'Medium');
+        overallRisk = hasHigh ? 'High' : (hasMedium ? 'Medium' : 'Low');
+    }
 
     const stats = [
         {
-            label: "Attendance",
-            value: hasBehaviorData && attPct !== undefined ? `${attPct}%` : "No Data",
-            icon: Clock,
-            color: "text-purple-600",
-            bg: "bg-purple-100"
+            label: "Current Semester",
+            value: dashboardData?.semester || "N/A",
+            icon: BookOpen,
+            color: "text-indigo-600",
+            bg: "bg-indigo-100"
         },
         {
-            label: "Submissions",
-            value: hasBehaviorData && subPct !== undefined ? `${subPct}%` : "No Data",
-            icon: BookOpen,
+            label: "Total / Assessed",
+            value: `${totalCourses} / ${coursesAssessed}`,
+            icon: Clock,
             color: "text-blue-600",
             bg: "bg-blue-100"
         },
         {
-            label: "Quiz Avg",
-            value: hasBehaviorData && quizAvg !== undefined ? `${quizAvg}` : "No Data",
+            label: "Coverage",
+            value: `${coverage}%`,
             icon: Zap,
-            color: "text-orange-600",
-            bg: "bg-orange-100"
+            color: "text-emerald-600",
+            bg: "bg-emerald-100"
         },
         {
-            label: "Risk Level",
-            value: prediction?.riskLevel || "N/A",
+            label: "Overall Risk",
+            value: overallRisk,
             icon: ShieldCheck,
-            color: prediction?.riskLevel === 'High' ? "text-red-600" : (prediction?.riskLevel === 'Medium' ? "text-yellow-600" : (prediction?.riskLevel === 'Low' ? "text-green-600" : "text-muted-foreground")),
-            bg: prediction?.riskLevel === 'High' ? "bg-red-100" : (prediction?.riskLevel === 'Medium' ? "bg-yellow-100" : (prediction?.riskLevel === 'Low' ? "bg-green-100" : "bg-secondary"))
+            color: overallRisk === 'High' ? "text-red-600" : (overallRisk === 'Medium' ? "text-amber-600" : (overallRisk === 'Low' ? "text-emerald-600" : "text-muted-foreground")),
+            bg: overallRisk === 'High' ? "bg-red-100" : (overallRisk === 'Medium' ? "bg-amber-100" : (overallRisk === 'Low' ? "bg-emerald-100" : "bg-secondary"))
         },
     ];
 
