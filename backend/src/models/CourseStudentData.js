@@ -4,9 +4,11 @@ const courseStudentDataSchema = new mongoose.Schema({
     studentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: false, // Optional for demo records
         index: true
     },
+    demoStudentName: { type: String },
+    demoStudentRoll: { type: String },
     courseId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
@@ -48,7 +50,8 @@ const courseStudentDataSchema = new mongoose.Schema({
     
     // Extraneous
     comments: { type: String, trim: true },
-    academicYear: { type: String }
+    academicYear: { type: String },
+    isDemo: { type: Boolean, default: false }
     
 }, { timestamps: true });
 

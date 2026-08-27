@@ -108,9 +108,9 @@ const predictPreview = async (behaviorData) => {
         quizAverage: behaviorData.quizAverage || 0,
         midtermMarks: behaviorData.midtermMarks || 0,
         studyHoursPerWeek: behaviorData.studyHoursPerWeek || 0,
-        engagementScore: behaviorData.classEngagement || 0,
+        engagementScore: (behaviorData.classEngagement || 0) / 10,
         loginFrequency: behaviorData.loginFrequency || 0,
-        participationScore: behaviorData.participationInActivities || 0,
+        participationScore: (behaviorData.participationInActivities || 0) / 10,
         stressLevel: behaviorData.stressLevel || 5,
         motivationLevel: behaviorData.academicMotivation || 5
     };
@@ -149,10 +149,10 @@ const predictForCourse = async (courseStudentDataId) => {
         quizAverage: courseData.quizAverage || 0,
         midtermMarks: courseData.midtermMarks || 0,
         studyHoursPerWeek: courseData.studyHoursPerWeek || 0,
-        engagementScore: courseData.classEngagement || 0,
+        engagementScore: (courseData.classEngagement || 0) / 10,
         // Since we don't have loginFrequency in courseData exactly, we might default to 5 or extract from somewhere else
         loginFrequency: 5,
-        participationScore: courseData.participationInActivities || 0,
+        participationScore: (courseData.participationInActivities || 0) / 10,
         stressLevel: 5, // Default or placeholder
         motivationLevel: 5 // Default or placeholder
     };

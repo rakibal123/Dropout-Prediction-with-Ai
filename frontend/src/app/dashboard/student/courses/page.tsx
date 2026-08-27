@@ -39,16 +39,43 @@ export default function StudentCoursesPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch actual courses from API if implemented in the future
-        // For now, it represents an empty state as there are no courses in the database
         const fetchCourses = async () => {
             try {
-                // Simulated API call structure
-                // const res = await fetch('/api/student/courses');
-                // const data = await res.json();
-                // setCourses(data);
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/courses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await res.json();
+                
+                if (data.status === 'success' && data.data && data.data.courses) {
+                    const mappedCourses = data.data.courses.map((c: any) => ({
+                        id: c._id,
+                        code: c.code || 'N/A',
+                        title: c.title || 'Course',
+                        instructor: c.teacher?.fullName || 'Not Assigned',
+                        instructorEmail: c.teacher?.email || 'N/A',
+                        credits: c.credits || 3,
+                        room: 'Online/TBA',
+                        schedule: 'TBA',
+                        progress: c.dataStatus === 'Available' ? 100 : 0,
+                        grade: c.dataStatus === 'Available' ? 'Evaluated' : 'Pending',
+                        category: 'Core',
+                        description: c.description || 'No description provided.',
+                        risk: c.risk, // Adding risk for display
+                        syllabus: [
+                            { week: 1, topic: 'Introduction', status: 'Completed' },
+                            { week: 2, topic: 'Core Concepts', status: 'In Progress' }
+                        ],
+                        upcomingAssignments: []
+                    }));
+                    setCourses(mappedCourses);
+                }
             } catch (error) {
                 console.error("Error fetching courses", error);
+                showToast("Failed to fetch courses.", "error");
             } finally {
                 setIsLoading(false);
             }

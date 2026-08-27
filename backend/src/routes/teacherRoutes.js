@@ -12,5 +12,6 @@ router.get('/courses/:courseId/students', teacherAcademicController.getCourseStu
 router.get('/courses/:courseId/template', teacherAcademicController.downloadExcelTemplate);
 router.post('/courses/:courseId/upload', teacherAcademicController.uploadCourseData);
 router.post('/courses/:courseId/manual-upload', teacherAcademicController.uploadManualData);
+router.post('/courses/:courseId/predict-preview', teacherAcademicController.predictPreview);
 
 module.exports = router;
