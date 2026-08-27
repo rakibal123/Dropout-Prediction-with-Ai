@@ -83,7 +83,7 @@ export function Sidebar({ role }: SidebarProps) {
 
     const getLinks = () => {
         const common = [
-            { name: "Dashboard", href: `/dashboard/${role}`, icon: LayoutDashboard },
+            { name: role === "teacher" ? "My Courses" : "Dashboard", href: `/dashboard/${role}`, icon: role === "teacher" ? BookOpen : LayoutDashboard },
             { name: "Messages", href: `/dashboard/${role}/messages`, icon: MessageSquare },
             { name: "Settings", href: `/dashboard/${role}/settings`, icon: Settings },
             { name: "Profile", href: `/dashboard/${role}/profile`, icon: UserCircle },
@@ -97,7 +97,6 @@ export function Sidebar({ role }: SidebarProps) {
         ];
 
         const teacherLinks = [
-            { name: "My Students", href: "/dashboard/teacher/students", icon: Users },
             { name: "Interventions", href: "/dashboard/teacher/interventions", icon: Target },
             { name: "Risk Reports", href: "/dashboard/teacher/reports", icon: AlertTriangle },
             { name: "Analytics", href: "/dashboard/teacher/analytics", icon: BarChart4 },
