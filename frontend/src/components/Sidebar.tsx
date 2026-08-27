@@ -105,6 +105,7 @@ export function Sidebar({ role }: SidebarProps) {
 
         const adminLinks = [
             { name: "Institutional Directory", href: "/dashboard/admin/users", icon: ShieldCheck },
+            { name: "Course Assignments", href: "/dashboard/admin/assignments", icon: BookOpen },
             { name: "Intervention Center", href: "/dashboard/admin/intervention-center", icon: Target },
             { name: "Global Analytics", href: "/dashboard/admin/analytics", icon: BarChart4 },
             { name: "System Config", href: "/dashboard/admin/config", icon: Settings },
