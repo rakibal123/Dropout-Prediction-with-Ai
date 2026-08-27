@@ -100,6 +100,42 @@ const predict = async (behaviorRecordId, studentId) => {
     };
 };
 
+const predictPreview = async (behaviorData) => {
+    // Prepare payload exactly matching the FastAPI contract
+    const mlPayload = {
+        attendancePercentage: behaviorData.attendancePercentage || 0,
+        assignmentSubmissionRate: behaviorData.assignmentSubmissionRate || 0,
+        quizAverage: behaviorData.quizAverage || 0,
+        midtermMarks: behaviorData.midtermMarks || 0,
+        studyHoursPerWeek: behaviorData.studyHoursPerWeek || 0,
+        engagementScore: behaviorData.classEngagement || 0,
+        loginFrequency: behaviorData.loginFrequency || 0,
+        participationScore: behaviorData.participationInActivities || 0,
+        stressLevel: behaviorData.stressLevel || 5,
+        motivationLevel: behaviorData.academicMotivation || 5
+    };
+
+    // Call ML Service with Retry & Timeout
+    const mlResponse = await fetchMLPrediction(mlPayload);
+
+    if (!mlResponse.success) {
+        throw new AppError("ML Prediction failed internally.", 500);
+    }
+
+    const predictionData = mlResponse.prediction;
+    const explanationData = mlResponse.explanation;
+
+    return {
+        riskLevel: predictionData.riskLevel,
+        finalScore: predictionData.finalScore,
+        confidence: predictionData.confidence,
+        probability: predictionData.probability,
+        topFactors: explanationData.topFactors,
+        recommendation: mlResponse.recommendation
+    };
+};
+
 module.exports = {
-    predict
+    predict,
+    predictPreview
 };

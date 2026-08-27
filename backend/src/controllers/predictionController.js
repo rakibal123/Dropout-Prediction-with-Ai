@@ -16,6 +16,16 @@ const predict = asyncHandler(async (req, res) => {
     });
 });
 
+const predictPreview = asyncHandler(async (req, res) => {
+    const result = await predictionService.predictPreview(req.body);
+
+    res.status(200).json({
+        success: true,
+        ...result
+    });
+});
+
 module.exports = {
-    predict
+    predict,
+    predictPreview
 };

@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useForm } from "react-hook-form";
-import { Zap, Loader2, ArrowLeft, Brain, BookOpen, Clock, Activity, Target } from "lucide-react";
+import { Zap, Loader2, ArrowLeft, Brain, BookOpen, Clock, Activity, Target, TrendingUp, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import { motion } from "framer-motion";
@@ -30,10 +32,58 @@ export default function RiskAssessmentPage() {
     const {
         register,
         handleSubmit,
+        watch,
         formState: { errors, isSubmitting }
     } = useForm<AssessmentFormData>({
         mode: "onTouched"
     });
+
+    const [preview, setPreview] = useState<any>(null);
+    const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+    const formData = watch();
+
+    useEffect(() => {
+        const fetchPreview = async () => {
+            if (formData.attendancePercentage === undefined || 
+                formData.assignmentSubmissionRate === undefined ||
+                Number.isNaN(formData.attendancePercentage) ||
+                Number.isNaN(formData.assignmentSubmissionRate)) {
+                return;
+            }
+
+            setIsPreviewLoading(true);
+            try {
+                const token = localStorage.getItem("token");
+                const headers = { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                };
+
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predict-preview`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(formData)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if(data.success) {
+                        setPreview(data);
+                    }
+                }
+            } catch (err: any) {
+                console.error("Preview fetch error:", err);
+            } finally {
+                setIsPreviewLoading(false);
+            }
+        };
+
+        const timeoutId = setTimeout(() => {
+            fetchPreview();
+        }, 800);
+
+        return () => clearTimeout(timeoutId);
+    }, [JSON.stringify(formData)]);
 
     const onSubmit = async (data: AssessmentFormData) => {
         try {
@@ -52,7 +102,7 @@ export default function RiskAssessmentPage() {
 
     return (
         <DashboardLayout role="student">
-            <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-10">
+            <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-10">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="sm" onClick={() => router.back()} className="h-8 w-8 p-0 rounded-full">
                         <ArrowLeft className="h-4 w-4" />
@@ -63,7 +113,9 @@ export default function RiskAssessmentPage() {
                     </div>
                 </div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <Card className="border-none shadow-premium bg-gradient-to-br from-card to-secondary/10">
                             <CardHeader className="border-b border-border bg-primary/5 pb-6">
@@ -262,6 +314,67 @@ export default function RiskAssessmentPage() {
                         </Card>
                     </form>
                 </motion.div>
+                </div>
+                
+                {/* Real-time Preview Pane */}
+                <div className="lg:col-span-1">
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="sticky top-6">
+                        <Card className="border-none shadow-premium-lg overflow-hidden bg-gradient-to-br from-card to-primary/5 h-full">
+                            <CardHeader className="bg-primary/5 border-b border-primary/10">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <TrendingUp className="h-5 w-5 text-primary" />
+                                    Real-time Prediction
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {isPreviewLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                        <p className="text-sm text-muted-foreground animate-pulse">Analyzing behavior with ML...</p>
+                                    </div>
+                                ) : !preview ? (
+                                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                                        <ShieldCheck className="h-12 w-12 text-primary/20 mb-4" />
+                                        <p className="text-sm text-muted-foreground">Start filling out the form to see your real-time dropout risk prediction.</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
+                                        <div className="flex flex-col items-center justify-center pt-4">
+                                            <div className="text-5xl font-black text-primary mb-2">
+                                                {preview.probability}%
+                                            </div>
+                                            <div className={`text-xs font-bold px-4 py-1 rounded-full ${preview.riskLevel === 'High' ? 'bg-risk-high text-white' :
+                                                preview.riskLevel === 'Medium' ? 'bg-risk-medium text-white' :
+                                                    'bg-risk-low text-white'
+                                                }`}>
+                                                {preview.riskLevel} Risk
+                                            </div>
+                                            <p className="mt-3 text-xs text-muted-foreground text-center">
+                                                Based on your input, your risk of dropping out is {preview.riskLevel.toLowerCase()}.
+                                            </p>
+                                        </div>
+                                        
+                                        {preview.topFactors && preview.topFactors.length > 0 && (
+                                            <div className="bg-secondary/30 rounded-xl p-4">
+                                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Key Factors</h4>
+                                                <ul className="space-y-2">
+                                                    {preview.topFactors.map((factor: any, idx: number) => (
+                                                        <li key={idx} className="text-sm flex justify-between">
+                                                            <span className="font-medium text-foreground">{factor.feature}</span>
+                                                            <span className="text-muted-foreground">{factor.impact} impact</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+                
+                </div>
             </div>
         </DashboardLayout>
     );

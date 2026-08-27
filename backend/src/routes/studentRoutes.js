@@ -20,5 +20,6 @@ router.get('/behavior/latest', studentController.getLatestBehavior);
 
 router.post('/behavior', behaviorValidator, behaviorController.submitBehavior);
 router.post('/predict', predictionController.predict);
+router.post('/predict-preview', predictionController.predictPreview);
 
 module.exports = router;
