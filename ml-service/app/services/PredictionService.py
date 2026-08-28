@@ -124,14 +124,14 @@ class PredictionService:
                 
                 # Make names readable (camelCase to Title Case)
                 import re
-                readable_name = re.sub("([a-z])([A-Z])","\g<1> \g<2>", c["feature"]).title()
+                readable_name = re.sub("([a-z])([A-Z])", r"\g<1> \g<2>", c["feature"]).title()
                 
                 top_factors.append({
                     "feature": readable_name,
                     "impact": impact,
                     "direction": direction,
                     "contribution": round(abs(c["contribution"]) * 10, 1), # Normalize for UI percentage
-                    "rawValue": c["value"]
+                    "value": float(c["value"])
                 })
 
             # Recommendations
