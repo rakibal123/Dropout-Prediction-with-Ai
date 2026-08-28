@@ -45,7 +45,7 @@ export default function StudentSchedulePage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const semData = await semRes.json();
-                if (semData.success && semData.data.semesters) {
+                if (semData.status === 'success' && semData.data.semesters) {
                     setSemesters(semData.data.semesters);
                 }
 
@@ -54,7 +54,7 @@ export default function StudentSchedulePage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const currSemData = await currSemRes.json();
-                if (currSemData.success && currSemData.data.currentSemester) {
+                if (currSemData.status === 'success' && currSemData.data.currentSemester) {
                     setActiveSemester(currSemData.data.currentSemester._id);
                 }
 
@@ -75,7 +75,7 @@ export default function StudentSchedulePage() {
             });
                 const data = await res.json();
                 
-                if (data.success && data.courses && data.courses.length > 0) {
+                if (data.status === 'success' && data.data.courses && data.data.courses.length > 0) {
                     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
                     const colors = [
                         "border-l-blue-500 bg-blue-500/10",
@@ -86,18 +86,18 @@ export default function StudentSchedulePage() {
                     ];
                     
                     const generatedSchedule: ScheduleItem[] = [];
-                    data.courses.forEach((c: any, index: number) => {
+                    data.data.courses.forEach((c: any, index: number) => {
                         // Assign deterministic days/times based on index to distribute them across the week
                         const dayIndex = index % days.length;
                         const timeSlot = index % 2 === 0 ? "09:00 AM - 10:30 AM" : "11:00 AM - 12:30 PM";
-                        const isLab = c.code.toLowerCase().includes('lab') || c.name.toLowerCase().includes('lab');
+                        const isLab = (c.code || '').toLowerCase().includes('lab') || (c.title || c.name || '').toLowerCase().includes('lab');
                         
                         generatedSchedule.push({
                             id: c._id,
                             day: days[dayIndex],
                             time: timeSlot,
-                            code: c.code,
-                            title: c.name,
+                            code: c.code || 'N/A',
+                            title: c.title || c.name || 'Course',
                             instructor: c.teacher?.fullName || 'TBA',
                             room: isLab ? `Lab 30${index + 1}` : `Room 40${index + 1}`,
                             type: isLab ? "Lab" : "Lecture",
