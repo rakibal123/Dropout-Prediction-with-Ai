@@ -648,7 +648,7 @@ export default function CourseDetailPage() {
                                             <div className="flex-1">
                                                 <p className="text-xs text-muted-foreground">Prediction Probability</p>
                                                 <p className="font-semibold text-sm">
-                                                    {predictionResult.probability?.high ? (predictionResult.probability.high * 100).toFixed(1) : (predictionResult.confidence * 100).toFixed(1)}%
+                                                    {predictionResult.probability?.high ? (predictionResult.probability.high).toFixed(1) : (predictionResult.confidence).toFixed(1)}%
                                                 </p>
                                             </div>
                                         </div>
