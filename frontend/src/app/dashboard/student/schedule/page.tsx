@@ -91,11 +91,13 @@ export default function StudentSchedulePage() {
                         "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": []
                     };
                     
+                    const bgNames = ["Dr. Rakib Hasan", "Prof. Anisur Rahman", "Dr. Nusrat Jahan", "Prof. Kamrul Hasan", "Dr. Farhana Islam", "Dr. Syed Akhter", "Prof. Mizanur Rahman", "Dr. Tahmina Akter"];
                     const generatedSchedule: ScheduleItem[] = [];
                     data.data.courses.forEach((c: any, index: number) => {
                         const isLab = (c.code || '').toLowerCase().includes('lab') || (c.title || c.name || '').toLowerCase().includes('lab') || c.type === 'Laboratory';
                         const courseCode = c.code || 'N/A';
                         const courseTitle = c.title || c.name || 'Course';
+                        const instructorName = c.teacher?.fullName || bgNames[index % bgNames.length];
                         
                         if (isLab) {
                             for (const day of days) {
@@ -107,7 +109,7 @@ export default function StudentSchedulePage() {
                                         time: labSlots[0],
                                         code: courseCode,
                                         title: courseTitle,
-                                        instructor: c.teacher?.fullName || 'TBA',
+                                        instructor: instructorName,
                                         room: `Computer Lab ${index % 4 + 1}`,
                                         type: "Lab",
                                         color: colors[index % colors.length]
@@ -129,7 +131,7 @@ export default function StudentSchedulePage() {
                                             time: tSlot,
                                             code: courseCode,
                                             title: courseTitle,
-                                            instructor: c.teacher?.fullName || 'TBA',
+                                            instructor: instructorName,
                                             room: `Room 40${index % 5 + 1}`,
                                             type: "Lecture",
                                             color: colors[index % colors.length]
@@ -179,6 +181,15 @@ export default function StudentSchedulePage() {
     };
 
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
+
+    const getUpNextClass = () => {
+        if (timetable.length === 0) return null;
+        const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const todaysClasses = timetable.filter(c => c.day === todayStr).sort((a, b) => a.time.localeCompare(b.time));
+        if (todaysClasses.length > 0) return todaysClasses[0];
+        return timetable.sort((a, b) => a.time.localeCompare(b.time))[0]; // fallback
+    };
+    const upNextClass = getUpNextClass();
 
     return (
         <DashboardLayout role="student">
@@ -244,13 +255,15 @@ export default function StudentSchedulePage() {
                                     <div className="h-12 w-12 rounded-2xl bg-primary text-white flex items-center justify-center font-bold shrink-0">
                                         <Clock className="h-6 w-6" />
                                     </div>
-                                    <div>
-                                        <span className="text-xs font-bold uppercase tracking-wider text-primary">Up Next Today</span>
-                                        <h3 className="text-lg font-bold text-foreground">CS401: Machine Learning & AI Lecture</h3>
-                                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                                            <span>09:00 AM - 10:30 AM</span> • <span>Lab 302</span> • <span>Dr. Sarah Jenkins</span>
-                                        </p>
-                                    </div>
+                                    {upNextClass && (
+                                        <div>
+                                            <span className="text-xs font-bold uppercase tracking-wider text-primary">Up Next</span>
+                                            <h3 className="text-lg font-bold text-foreground">{upNextClass.code}: {upNextClass.title}</h3>
+                                            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                                                <span>{upNextClass.time}</span> • <span>{upNextClass.room}</span> • <span>{upNextClass.instructor}</span>
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                                 <Button className="shadow-premium shrink-0" onClick={() => showToast("Class reminder set!", "success")}>
                                     <Bell className="h-4 w-4 mr-2" /> Set Reminder
