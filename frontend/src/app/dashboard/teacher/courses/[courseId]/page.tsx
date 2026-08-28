@@ -136,7 +136,7 @@ export default function CourseDetailPage() {
         setLoadingStudents(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/courses/${courseId}/students?semesterId=${semesterId}`, {
+            const res = await fetch(`/api/teacher/courses/${courseId}/students?semesterId=${semesterId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -164,7 +164,7 @@ export default function CourseDetailPage() {
                 semesterId,
                 ...manualForm
             };
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/courses/${courseId}/predict-preview`, {
+            const res = await fetch(`/api/teacher/courses/${courseId}/predict-preview`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -204,7 +204,7 @@ export default function CourseDetailPage() {
             } else {
                 payload.studentId = selectedStudentForManual.student._id;
             }
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/courses/${courseId}/manual-upload`, {
+            const res = await fetch(`/api/teacher/courses/${courseId}/manual-upload`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -231,7 +231,7 @@ export default function CourseDetailPage() {
     const downloadTemplate = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/courses/${courseId}/template?semesterId=${semesterId}`, {
+            const res = await fetch(`/api/teacher/courses/${courseId}/template?semesterId=${semesterId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -314,7 +314,7 @@ export default function CourseDetailPage() {
             formData.append('file', uploadFile);
             formData.append('semesterId', semesterId!);
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/courses/${courseId}/upload`, {
+            const res = await fetch(`/api/teacher/courses/${courseId}/upload`, {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData

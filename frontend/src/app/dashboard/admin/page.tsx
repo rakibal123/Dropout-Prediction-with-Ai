@@ -31,10 +31,10 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem('token');
             const [dashRes, statsRes] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/dashboard`, {
+                fetch(`/api/admin/dashboard`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/analytics`, {
+                fetch(`/api/admin/analytics`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);

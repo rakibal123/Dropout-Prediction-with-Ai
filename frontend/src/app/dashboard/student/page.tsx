@@ -69,10 +69,10 @@ export default function StudentDashboard() {
             const headers = { "Authorization": `Bearer ${token}` };
 
             const [dashRes, predRes, behavRes, coursesRes] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/dashboard`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predictions/latest`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/behavior/latest`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/courses`, { headers })
+                fetch(`/api/student/dashboard`, { headers }),
+                fetch(`/api/student/predictions/latest`, { headers }),
+                fetch(`/api/student/behavior/latest`, { headers }),
+                fetch(`/api/student/courses`, { headers })
             ]);
 
             if (!dashRes.ok) throw new Error("Failed to load dashboard data");

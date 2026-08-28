@@ -36,7 +36,7 @@ export default function StudentSchedulePage() {
         const fetchCoursesAndSchedule = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/student/courses`, {
+                const res = await fetch(`/api/student/courses`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();

@@ -30,7 +30,7 @@ export default function TeacherDashboard() {
         setLoadingCourses(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/teacher/my-courses`, {
+            const res = await fetch(`/api/teacher/my-courses`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();

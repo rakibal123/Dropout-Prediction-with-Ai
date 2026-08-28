@@ -19,7 +19,7 @@ export default function AdminInterventionCenterPage() {
     const fetchInterventions = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/recommendations`, {
+            const res = await fetch(`/api/recommendations`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const json = await res.json();

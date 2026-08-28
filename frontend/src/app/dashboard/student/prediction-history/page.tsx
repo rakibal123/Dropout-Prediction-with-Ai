@@ -70,7 +70,7 @@ export default function PredictionHistoryPage() {
                 riskLevel: riskFilter,
                 sort
             });
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predictions?${queryParams}`, {
+            const res = await fetch(`/api/student/predictions?${queryParams}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await res.json();
@@ -82,7 +82,7 @@ export default function PredictionHistoryPage() {
 
             // 2. Fetch ALL data (without pagination) for charts and analytics
             if (page === 1) { // Only fetch all on first load or filter change
-                const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predictions?limit=1000`, {
+                const allRes = await fetch(`/api/student/predictions?limit=1000`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
                 const allData = await allRes.json();

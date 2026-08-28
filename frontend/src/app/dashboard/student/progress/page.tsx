@@ -39,8 +39,8 @@ export default function StudentProgressPage() {
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
             const [dashRes, behavRes] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/dashboard`, { headers }).catch(() => null),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/behavior/latest`, { headers }).catch(() => null)
+                fetch(`/api/student/dashboard`, { headers }).catch(() => null),
+                fetch(`/api/student/behavior/latest`, { headers }).catch(() => null)
             ]);
 
             if (dashRes && dashRes.ok) {

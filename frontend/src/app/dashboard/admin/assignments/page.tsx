@@ -46,10 +46,10 @@ export default function AdminAssignmentsPage() {
             const headers = { Authorization: `Bearer ${token}` };
             
             const [assRes, teachRes, semRes, courseRes] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/academic/assignments`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/users?role=teacher`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/academic/semesters`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/academic/courses`, { headers })
+                fetch(`/api/academic/assignments`, { headers }),
+                fetch(`/api/admin/users?role=teacher`, { headers }),
+                fetch(`/api/academic/semesters`, { headers }),
+                fetch(`/api/academic/courses`, { headers })
             ]);
 
             if (assRes.ok) { const json = await assRes.json(); setAssignments(json.data.assignments); }
@@ -73,7 +73,7 @@ export default function AdminAssignmentsPage() {
         setSubmitting(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/academic/assignments`, {
+            const res = await fetch(`/api/academic/assignments`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",
