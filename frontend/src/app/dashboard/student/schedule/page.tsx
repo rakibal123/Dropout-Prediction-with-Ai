@@ -85,39 +85,60 @@ export default function StudentSchedulePage() {
                         "border-l-pink-500 bg-pink-500/10"
                     ];
                     
+                    const theorySlots = ["08:30 AM - 10:00 AM", "10:00 AM - 11:30 AM", "11:30 AM - 01:00 PM"];
+                    const labSlots = ["02:00 PM - 05:00 PM"];
+                    const occupied: Record<string, string[]> = {
+                        "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": []
+                    };
+                    
                     const generatedSchedule: ScheduleItem[] = [];
                     data.data.courses.forEach((c: any, index: number) => {
-                        // Assign deterministic days/times based on index to distribute them across the week
-                        const dayIndex = index % days.length;
-                        const timeSlot = index % 2 === 0 ? "09:00 AM - 10:30 AM" : "11:00 AM - 12:30 PM";
-                        const isLab = (c.code || '').toLowerCase().includes('lab') || (c.title || c.name || '').toLowerCase().includes('lab');
+                        const isLab = (c.code || '').toLowerCase().includes('lab') || (c.title || c.name || '').toLowerCase().includes('lab') || c.type === 'Laboratory';
+                        const courseCode = c.code || 'N/A';
+                        const courseTitle = c.title || c.name || 'Course';
                         
-                        generatedSchedule.push({
-                            id: c._id,
-                            day: days[dayIndex],
-                            time: timeSlot,
-                            code: c.code || 'N/A',
-                            title: c.title || c.name || 'Course',
-                            instructor: c.teacher?.fullName || 'TBA',
-                            room: isLab ? `Lab 30${index + 1}` : `Room 40${index + 1}`,
-                            type: isLab ? "Lab" : "Lecture",
-                            color: colors[index % colors.length]
-                        });
-                        
-                        // Add a second slot for theory courses later in the week
-                        if (!isLab) {
-                            const secondDayIndex = (dayIndex + 2) % days.length;
-                            generatedSchedule.push({
-                                id: c._id + '_2',
-                                day: days[secondDayIndex],
-                                time: index % 2 === 0 ? "01:00 PM - 02:30 PM" : "03:00 PM - 04:30 PM",
-                                code: c.code,
-                                title: c.name,
-                                instructor: c.teacher?.fullName || 'TBA',
-                                room: `Room 40${index + 1}`,
-                                type: "Lecture",
-                                color: colors[index % colors.length]
-                            });
+                        if (isLab) {
+                            for (const day of days) {
+                                if (!occupied[day].includes("lab")) {
+                                    occupied[day].push("lab");
+                                    generatedSchedule.push({
+                                        id: c._id,
+                                        day: day,
+                                        time: labSlots[0],
+                                        code: courseCode,
+                                        title: courseTitle,
+                                        instructor: c.teacher?.fullName || 'TBA',
+                                        room: `Computer Lab ${index % 4 + 1}`,
+                                        type: "Lab",
+                                        color: colors[index % colors.length]
+                                    });
+                                    break;
+                                }
+                            }
+                        } else {
+                            let slotsAssigned = 0;
+                            for (const day of days) {
+                                if (slotsAssigned >= 2) break;
+                                
+                                for (const tSlot of theorySlots) {
+                                    if (!occupied[day].includes(tSlot)) {
+                                        occupied[day].push(tSlot);
+                                        generatedSchedule.push({
+                                            id: c._id + '_' + slotsAssigned,
+                                            day: day,
+                                            time: tSlot,
+                                            code: courseCode,
+                                            title: courseTitle,
+                                            instructor: c.teacher?.fullName || 'TBA',
+                                            room: `Room 40${index % 5 + 1}`,
+                                            type: "Lecture",
+                                            color: colors[index % colors.length]
+                                        });
+                                        slotsAssigned++;
+                                        break; 
+                                    }
+                                }
+                            }
                         }
                     });
                     
