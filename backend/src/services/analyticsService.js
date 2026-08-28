@@ -110,21 +110,31 @@ const getTrends = async (departmentFilter) => {
 
 const getHighRiskStudents = async (departmentFilter) => {
     const query = departmentFilter ? { department: departmentFilter, role: 'student' } : { role: 'student' };
-    const students = await User.find(query).select('_id fullName email department');
+    const students = await User.find(query).select('_id fullName email department').lean();
+    const studentIds = students.map(s => s._id);
     
+    const latestPredictions = await PredictionHistory.aggregate([
+        { $match: { studentId: { $in: studentIds } } },
+        { $sort: { createdAt: -1 } },
+        { $group: { _id: "$studentId", prediction: { $first: "$prediction" } } }
+    ]);
+    
+    const predictionMap = {};
+    latestPredictions.forEach(p => predictionMap[p._id.toString()] = p.prediction);
+
     const highRiskList = [];
     
     for (const student of students) {
-        const latestPred = await PredictionHistory.findOne({ studentId: student._id }).sort({ createdAt: -1 });
-        if (latestPred && latestPred.prediction && latestPred.prediction.riskLevel === 'High') {
+        const prediction = predictionMap[student._id.toString()];
+        if (prediction && prediction.riskLevel === 'High') {
             highRiskList.push({
                 studentId: student._id,
                 fullName: student.fullName,
                 department: student.department,
                 email: student.email,
                 riskLevel: 'High',
-                reason: latestPred.prediction.reasons ? latestPred.prediction.reasons[0] : 'Low engagement and attendance',
-                recommendedAction: latestPred.prediction.suggestions ? latestPred.prediction.suggestions[0] : 'Schedule immediate counseling',
+                reason: prediction.reasons ? prediction.reasons[0] : 'Low engagement and attendance',
+                recommendedAction: prediction.suggestions ? prediction.suggestions[0] : 'Schedule immediate counseling',
                 assignedTeacher: 'Pending'
             });
         }
@@ -134,7 +144,17 @@ const getHighRiskStudents = async (departmentFilter) => {
 };
 
 const getDepartmentsRisk = async () => {
-    const students = await User.find({ role: 'student' }).select('_id department');
+    const students = await User.find({ role: 'student' }).select('_id department').lean();
+    const studentIds = students.map(s => s._id);
+    
+    const latestPredictions = await PredictionHistory.aggregate([
+        { $match: { studentId: { $in: studentIds } } },
+        { $sort: { createdAt: -1 } },
+        { $group: { _id: "$studentId", riskLevel: { $first: "$prediction.riskLevel" } } }
+    ]);
+    
+    const predictionMap = {};
+    latestPredictions.forEach(p => predictionMap[p._id.toString()] = p.riskLevel);
     
     const deptMap = {};
     for (const student of students) {
@@ -144,8 +164,7 @@ const getDepartmentsRisk = async () => {
             deptMap[student.department] = { High: 0, Medium: 0, Low: 0 };
         }
         
-        const latestPred = await PredictionHistory.findOne({ studentId: student._id }).sort({ createdAt: -1 });
-        const risk = latestPred?.prediction?.riskLevel || 'Low';
+        const risk = predictionMap[student._id.toString()] || 'Low';
         if (deptMap[student.department][risk] !== undefined) {
             deptMap[student.department][risk]++;
         }
