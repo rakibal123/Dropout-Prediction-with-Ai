@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { useState, useEffect } from "react";
 import { 
     BookOpen, User, Clock, MapPin, Calendar, CheckCircle2, 
-    FileText, Search, ExternalLink, MessageSquare, AlertCircle, ChevronRight, Download
+    FileText, Search, ExternalLink, MessageSquare, AlertCircle, ChevronRight, Download, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
@@ -37,16 +37,49 @@ export default function StudentCoursesPage() {
 
     const [courses, setCourses] = useState<Course[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isChangingSemester, setIsChangingSemester] = useState(false);
+    const [semesters, setSemesters] = useState<any[]>([]);
+    const [activeSemester, setActiveSemester] = useState<string>("");
 
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchInitialData = async () => {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) return;
-
-                const res = await fetch(`/api/student/courses`, {
+                
+                // Fetch semesters
+                const semRes = await fetch(`/api/student/semesters`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                const semData = await semRes.json();
+                if (semData.success && semData.data.semesters) {
+                    setSemesters(semData.data.semesters);
+                }
+
+                // Fetch current semester
+                const currSemRes = await fetch(`/api/student/current-semester`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const currSemData = await currSemRes.json();
+                if (currSemData.success && currSemData.data.currentSemester) {
+                    setActiveSemester(currSemData.data.currentSemester._id);
+                }
+
+                await fetchCourses(token);
+            } catch (err) {
+                console.error("Failed to load initial data", err);
+                setIsLoading(false);
+            }
+        };
+        fetchInitialData();
+    }, []);
+
+    const fetchCourses = async (token: string) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`/api/student/courses`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
                 
                 const data = await res.json();
                 
@@ -79,9 +112,34 @@ export default function StudentCoursesPage() {
             } finally {
                 setIsLoading(false);
             }
-        };
-        fetchCourses();
-    }, []);
+    };
+
+    const handleSemesterChange = async (semesterId: string) => {
+        setActiveSemester(semesterId);
+        setIsChangingSemester(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/student/current-semester`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ semesterId })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                showToast("Semester changed and courses auto-enrolled", "success");
+                await fetchCourses(token || '');
+            } else {
+                showToast(data.message || "Failed to change semester", "error");
+            }
+        } catch (error) {
+            showToast("Connection error", "error");
+        } finally {
+            setIsChangingSemester(false);
+        }
+    };
 
     const filteredCourses = courses.filter(c => {
         const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.code.toLowerCase().includes(searchQuery.toLowerCase()) || c.instructor.toLowerCase().includes(searchQuery.toLowerCase());
@@ -109,6 +167,17 @@ export default function StudentCoursesPage() {
                                 className="pl-9 h-10"
                             />
                         </div>
+                        <select
+                            className="flex h-10 w-full md:w-auto rounded-lg border border-input bg-card px-3 text-sm font-medium ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                            value={activeSemester}
+                            onChange={(e) => handleSemesterChange(e.target.value)}
+                            disabled={isChangingSemester}
+                        >
+                            <option value="" disabled>Select Semester</option>
+                            {semesters.map(sem => (
+                                <option key={sem._id} value={sem._id}>{sem.name}</option>
+                            ))}
+                        </select>
                         <select 
                             value={selectedCategory} 
                             onChange={(e) => setSelectedCategory(e.target.value)}
