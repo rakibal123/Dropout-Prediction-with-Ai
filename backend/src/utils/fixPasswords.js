@@ -11,7 +11,7 @@ const fixPasswords = async () => {
         console.log('MongoDB Connected to', process.env.MONGO_URI.split('@')[1] || process.env.MONGO_URI);
 
         const emailsToFix = [
-            'ozifa@university.edu',
+            'teacher2@university.edu',
             'rownok@university.edu',
             'setu@university.edu',
             'studentA@university.edu'

@@ -39,7 +39,7 @@ const seedAcademicData = async () => {
             return t;
         };
 
-        const teacherOzifa = await createTeacher("Ozifa Ma'am", 'ozifa@university.edu');
+        const teacherOzifa = await createTeacher("Teacher Two", 'teacher2@university.edu');
         const teacherRownok = await createTeacher("Rownok Ara Chowdhury", 'rownok@university.edu');
         const teacherSetu = await createTeacher("Setu Ma'am", 'setu@university.edu');
 
