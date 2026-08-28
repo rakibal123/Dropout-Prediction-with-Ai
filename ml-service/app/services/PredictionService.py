@@ -137,12 +137,9 @@ class PredictionService:
             # Recommendations
             recommendations = ExplanationGenerator.generate_recommendations(data, top_factors)
             
-            if risk_level == "Low":
-                final_score = confidence
-            elif risk_level == "High":
-                final_score = 100.0 - confidence
-            else:
-                final_score = 50.0 + (confidence / 2) if low_prob > high_prob else 50.0 - (confidence / 2)
+            # Calculate a unified risk score from 0-100 where higher means higher risk of dropout
+            # We use a weighted average of the probabilities: Low(0), Medium(0.5), High(1.0)
+            final_score = (low_prob * 0.0) + (medium_prob * 0.5) + (high_prob * 1.0)
             final_score = round(final_score, 2)
             
             exec_time = time.time() - start_time

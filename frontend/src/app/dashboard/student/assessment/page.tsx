@@ -94,7 +94,7 @@ export default function RiskAssessmentPage() {
             
             // 3. Update the UI with real ML results!
             setPreview({
-                probability: Math.round(predictData.mlResponse?.prediction?.confidence || predictData.finalScore || 0),
+                probability: Math.round(predictData.mlResponse?.prediction?.finalScore || predictData.finalScore || 0),
                 riskLevel: predictData.riskLevel || 'Unknown',
                 topFactors: predictData.mlResponse?.explanation?.topFactors || []
             });
