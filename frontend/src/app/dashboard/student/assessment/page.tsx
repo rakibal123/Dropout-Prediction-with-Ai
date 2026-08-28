@@ -42,61 +42,54 @@ export default function RiskAssessmentPage() {
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
     const formData = watch();
 
-    useEffect(() => {
-        const fetchPreview = async () => {
-            if (formData.attendancePercentage === undefined || 
-                formData.assignmentSubmissionRate === undefined ||
-                Number.isNaN(formData.attendancePercentage) ||
-                Number.isNaN(formData.assignmentSubmissionRate)) {
-                return;
-            }
-
-            setIsPreviewLoading(true);
-            try {
-                const token = localStorage.getItem("token");
-                const headers = { 
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                };
-
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/student/predict-preview`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(formData)
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if(data.success) {
-                        setPreview(data);
-                    }
-                }
-            } catch (err: any) {
-                console.error("Preview fetch error:", err);
-            } finally {
-                setIsPreviewLoading(false);
-            }
-        };
-
-        const timeoutId = setTimeout(() => {
-            fetchPreview();
-        }, 800);
-
-        return () => clearTimeout(timeoutId);
-    }, [JSON.stringify(formData)]);
-
     const onSubmit = async (data: AssessmentFormData) => {
+        setIsPreviewLoading(true);
         try {
-            // Simulated delay for UI purposes (backend integration later)
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log("Assessment Data:", data);
+            const token = localStorage.getItem("token");
+            const headers = { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            };
+
+            // 1. Submit Behavior Data
+            const behaviorRes = await fetch(`/api/student/behavior`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data)
+            });
+
+            if (!behaviorRes.ok) {
+                const err = await behaviorRes.json();
+                throw new Error(err.message || "Failed to save behavior");
+            }
             
-            showToast("Risk assessment data submitted successfully!", "success");
+            const behaviorData = await behaviorRes.json();
             
-            // Navigate back to dashboard after simulated success
-            router.push("/dashboard/student");
-        } catch (error) {
-            showToast("An error occurred while submitting the assessment.", "error");
+            // 2. Run Actual ML Prediction
+            const predictRes = await fetch(`/api/student/predict`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ behaviorRecordId: behaviorData.behaviorRecordId })
+            });
+
+            if (!predictRes.ok) throw new Error("ML Prediction failed");
+            
+            const predictData = await predictRes.json();
+            
+            // 3. Update the UI with real ML results!
+            setPreview({
+                probability: predictData.mlResponse.prediction.probability.high || predictData.mlResponse.prediction.confidence,
+                riskLevel: predictData.riskLevel,
+                topFactors: predictData.mlResponse.explanation.topFactors
+            });
+            
+            showToast("Risk assessment analyzed successfully!", "success");
+            
+        } catch (error: any) {
+            console.error(error);
+            showToast(error.message || "An error occurred while analyzing risk profile.", "error");
+        } finally {
+            setIsPreviewLoading(false);
         }
     };
 
