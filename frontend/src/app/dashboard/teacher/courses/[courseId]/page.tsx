@@ -694,16 +694,16 @@ export default function CourseDetailPage() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-card border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+                            className="bg-card border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
-                            <div className="p-6 border-b border-border flex items-center justify-between bg-secondary/30">
+                            <div className="p-6 border-b border-border flex items-center justify-between bg-secondary/30 shrink-0">
                                 <div>
                                     <h3 className="font-bold text-lg">Bulk Assessment Upload</h3>
                                     <p className="text-xs text-muted-foreground">Course: {courseName} ({courseCode}) • {semesterName}</p>
                                 </div>
                                 <button onClick={() => { setIsBulkModalOpen(false); setUploadResult(null); }} className="p-1 rounded-lg hover:bg-secondary"><X className="h-5 w-5" /></button>
                             </div>
-                            <div className="p-6 space-y-6">
+                            <div className="p-6 space-y-6 overflow-y-auto flex-1">
                                 {!uploadResult ? (
                                     <>
                                         <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex gap-4 items-center">
