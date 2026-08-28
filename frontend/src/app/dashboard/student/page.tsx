@@ -306,53 +306,36 @@ export default function StudentDashboard() {
                             <CardTitle className="text-lg">Risk Distribution</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center justify-center pt-2">
-                            {courses.length === 0 || courses.filter(c => c.dataStatus === 'Available').length === 0 ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-muted-foreground bg-card/50 backdrop-blur-sm z-10">
-                                    <ShieldCheck className="h-10 w-10 mb-3 opacity-20" />
-                                    <p className="font-medium text-sm">Prediction unavailable.</p>
-                                    <p className="text-xs max-w-xs mt-1">Teachers need to upload data for your courses.</p>
+                            <div className="grid grid-cols-1 w-full gap-2 mt-4">
+                                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-700">
+                                    <span className="text-xs font-bold">Low Risk</span>
+                                    <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Low').length} Courses</span>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="grid grid-cols-1 w-full gap-2 mt-4">
-                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-700">
-                                            <span className="text-xs font-bold">Low Risk</span>
-                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Low').length} Courses</span>
-                                        </div>
-                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/10 text-amber-700">
-                                            <span className="text-xs font-bold">Medium Risk</span>
-                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Medium').length} Courses</span>
-                                        </div>
-                                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-red-500/10 text-red-700">
-                                            <span className="text-xs font-bold">High Risk</span>
-                                            <span className="text-xs font-bold">{courses.filter(c => c.risk === 'High').length} Courses</span>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+                                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/10 text-amber-700">
+                                    <span className="text-xs font-bold">Medium Risk</span>
+                                    <span className="text-xs font-bold">{courses.filter(c => c.risk === 'Medium').length} Courses</span>
+                                </div>
+                                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-red-500/10 text-red-700">
+                                    <span className="text-xs font-bold">High Risk</span>
+                                    <span className="text-xs font-bold">{courses.filter(c => c.risk === 'High').length} Courses</span>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {!prediction ? (
-                    <Card className="border-none shadow-md overflow-hidden bg-primary/5 border border-primary/10">
-                        <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-                            <ShieldCheck className="h-16 w-16 text-primary/40 mb-4" />
-                            <h3 className="text-xl font-bold text-foreground mb-2">No prediction available yet.</h3>
-                            <p className="text-muted-foreground mb-6 max-w-sm">Complete your first risk assessment to get a detailed breakdown of your academic standing.</p>
-                            <Button className="shadow-premium" onClick={() => router.push('/dashboard/student/assessment')}>
-                                <Zap className="h-4 w-4 mr-2" />
-                                Check My Risk
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ) : (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="grid grid-cols-1 md:grid-cols-2 gap-6"
                     >
-                        <Card className="border-none shadow-premium-lg bg-gradient-to-br from-card to-secondary/30">
+                        <Card className="border-none shadow-premium-lg bg-gradient-to-br from-card to-secondary/30 relative">
+                            {!prediction && (
+                                <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-xl border border-border/50 p-6 text-center">
+                                    <p className="text-sm font-bold mb-3">No prediction available yet</p>
+                                    <Button size="sm" onClick={() => router.push('/dashboard/student/assessment')}>Check My Risk</Button>
+                                </div>
+                            )}
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-lg">
                                     <TrendingUp className="h-5 w-5 text-primary" />
@@ -361,34 +344,38 @@ export default function StudentDashboard() {
                             </CardHeader>
                             <CardContent className="flex flex-col items-center justify-center p-8 pb-10">
                                 <div className="text-6xl font-black text-primary mb-2">
-                                    {prediction.probability}%
+                                    {prediction?.probability || 0}%
                                 </div>
-                                <div className={`text-sm font-bold px-6 py-1.5 rounded-full ${prediction.riskLevel === 'High' ? 'bg-risk-high text-white' :
-                                    prediction.riskLevel === 'Medium' ? 'bg-risk-medium text-white' :
-                                        'bg-risk-low text-white'
+                                <div className={`text-sm font-bold px-6 py-1.5 rounded-full ${prediction?.riskLevel === 'High' ? 'bg-risk-high text-white' :
+                                    prediction?.riskLevel === 'Medium' ? 'bg-risk-medium text-white' :
+                                    prediction?.riskLevel === 'Low' ? 'bg-risk-low text-white' :
+                                    'bg-secondary text-muted-foreground'
                                     }`}>
-                                    {prediction.riskLevel} Dropout Risk
+                                    {prediction?.riskLevel || 'Unknown'} Dropout Risk
                                 </div>
                                 <p className="mt-4 text-xs text-muted-foreground text-center max-w-xs leading-relaxed mb-4">
-                                    Based on your current behavioral patterns, your risk of dropping out is {prediction.riskLevel.toLowerCase()}.
+                                    {prediction ? `Based on your current behavioral patterns, your risk of dropping out is ${prediction.riskLevel.toLowerCase()}.` : 'Complete your assessment to view insights.'}
                                 </p>
-                                {prediction.id && (
+                                {prediction?.id && (
                                     <ExplainableAIModal predictionId={prediction.id} riskLevel={prediction.riskLevel} confidence={prediction.probability} />
                                 )}
                             </CardContent>
                         </Card>
 
                         <div className="flex flex-col gap-4">
-                            <Card className="border-none shadow-md overflow-hidden flex-1">
+                            <Card className="border-none shadow-md overflow-hidden flex-1 relative">
+                                {!prediction && (
+                                    <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] z-10 rounded-xl" />
+                                )}
                                 <div className="bg-primary/10 px-6 py-3 flex items-center gap-2 border-b border-primary/10 font-bold text-[10px] tracking-wider uppercase text-primary">
                                     <AlertCircle className="h-3.5 w-3.5" />
                                     Identified Factors
                                 </div>
                                 <CardContent className="p-4 px-6">
                                     <ul className="space-y-3">
-                                        {prediction.reasons.map((reason, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm font-medium">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                        {(prediction?.reasons || ['Waiting for assessment...', 'No data provided']).map((reason, i) => (
+                                            <li key={i} className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-primary/50" />
                                                 {reason}
                                             </li>
                                         ))}
@@ -396,16 +383,19 @@ export default function StudentDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-none shadow-md overflow-hidden flex-1">
+                            <Card className="border-none shadow-md overflow-hidden flex-1 relative">
+                                {!prediction && (
+                                    <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] z-10 rounded-xl" />
+                                )}
                                 <div className="bg-green-500/10 px-6 py-3 flex items-center gap-2 border-b border-green-500/10 font-bold text-[10px] tracking-wider uppercase text-green-700">
                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                     Recommended Actions
                                 </div>
                                 <CardContent className="p-4 px-6">
                                     <ul className="space-y-3">
-                                        {prediction.suggestions.map((suggestion, i) => (
+                                        {(prediction?.suggestions || ['Complete assessment to get recommendations']).map((suggestion, i) => (
                                             <li key={i} className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-                                                <ChevronRight className="h-3.5 w-3.5 text-primary" />
+                                                <ChevronRight className="h-3.5 w-3.5 text-primary/50" />
                                                 {suggestion}
                                             </li>
                                         ))}
@@ -414,7 +404,6 @@ export default function StudentDashboard() {
                             </Card>
                         </div>
                     </motion.div>
-                )}
 
                 {error && (
                     <motion.div
