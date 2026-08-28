@@ -51,11 +51,24 @@ export default function RiskAssessmentPage() {
                 "Content-Type": "application/json"
             };
 
+            const payload = {
+                attendancePercentage: data.attendancePercentage,
+                assignmentSubmissionRate: data.assignmentSubmissionRate,
+                quizAverage: data.quizAverage,
+                midtermMarks: data.midtermMarks,
+                studyHoursPerWeek: data.studyHoursPerWeek,
+                engagementScore: Math.max(1, Math.min(10, data.classEngagement / 10)),
+                loginFrequency: data.loginFrequency,
+                participationScore: Math.max(1, Math.min(10, data.participationInActivities / 10)),
+                stressLevel: data.stressLevel,
+                motivationLevel: data.academicMotivation,
+            };
+
             // 1. Submit Behavior Data
             const behaviorRes = await fetch(`/api/student/behavior`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(data)
+                body: JSON.stringify(payload)
             });
 
             if (!behaviorRes.ok) {
@@ -78,9 +91,9 @@ export default function RiskAssessmentPage() {
             
             // 3. Update the UI with real ML results!
             setPreview({
-                probability: predictData.mlResponse.prediction.probability.high || predictData.mlResponse.prediction.confidence,
-                riskLevel: predictData.riskLevel,
-                topFactors: predictData.mlResponse.explanation.topFactors
+                probability: Math.round((predictData.mlResponse?.prediction?.confidence || predictData.finalScore || 0) * 100),
+                riskLevel: predictData.riskLevel || 'Unknown',
+                topFactors: predictData.mlResponse?.explanation?.topFactors || []
             });
             
             showToast("Risk assessment analyzed successfully!", "success");
@@ -198,7 +211,7 @@ export default function RiskAssessmentPage() {
                                         {...register("studyHoursPerWeek", {
                                             required: "Study hours are required",
                                             min: { value: 0, message: "Cannot be negative" },
-                                            max: { value: 168, message: "Cannot exceed hours in a week" },
+                                            max: { value: 80, message: "Cannot exceed 80 hours" },
                                             valueAsNumber: true
                                         })}
                                     />
