@@ -12,13 +12,11 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const seedAcademicData = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('MongoDB Connected to', process.env.MONGO_URI.split('@')[1] || process.env.MONGO_URI);
-
-        await Semester.deleteMany({});
-        await Course.deleteMany({});
-        await TeacherCourseAssignment.deleteMany({});
-        await CourseEnrollment.deleteMany({});
+        const semesterCount = await Semester.countDocuments();
+        if (semesterCount > 0) {
+            console.log('Academic data already seeded.');
+            return;
+        }
 
         const sem2 = await Semester.create({ name: 'Semester 2', number: 2 });
         const sem4 = await Semester.create({ name: 'Semester 4', number: 4 });
@@ -66,10 +64,9 @@ const seedAcademicData = async () => {
         await CourseEnrollment.create({ studentId: studentA._id, courseId: courseSoftwareEng._id, semesterId: sem4._id, academicYear: 2026 });
 
         console.log('Successfully seeded Semesters, Courses, Teachers, Assignments, and Student Enrollments.');
-        process.exit(0);
     } catch (err) {
-        console.error(err);
-        process.exit(1);
+        console.error('Error seeding academic data:', err);
     }
 };
-seedAcademicData();
+
+module.exports = seedAcademicData;
