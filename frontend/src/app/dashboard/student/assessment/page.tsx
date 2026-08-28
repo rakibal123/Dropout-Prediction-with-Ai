@@ -85,7 +85,10 @@ export default function RiskAssessmentPage() {
                 body: JSON.stringify({ behaviorRecordId: behaviorData.behaviorRecordId })
             });
 
-            if (!predictRes.ok) throw new Error("ML Prediction failed");
+            if (!predictRes.ok) {
+                const errData = await predictRes.json().catch(() => null);
+                throw new Error(errData?.message || "ML Prediction failed");
+            }
             
             const predictData = await predictRes.json();
             
