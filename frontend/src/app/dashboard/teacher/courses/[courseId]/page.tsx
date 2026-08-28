@@ -273,9 +273,10 @@ export default function CourseDetailPage() {
                 let invalid = 0;
                 const previewRows = data.map((row: any, i) => {
                     const roll = String(row['Roll Number']).trim();
+                    const isDemo = roll.startsWith('DEMO-');
                     const studentEnrolled = students.find(s => s.student.rollNumber === roll);
                     let status = "Valid";
-                    if (!studentEnrolled) {
+                    if (!studentEnrolled && !isDemo) {
                         status = "Invalid: Not enrolled";
                         invalid++;
                     } else if (Number(row['Attendance (%)']) < 0 || Number(row['Attendance (%)']) > 100) {
