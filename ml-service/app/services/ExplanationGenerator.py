@@ -32,8 +32,6 @@ class ExplanationGenerator:
         if data.quizAverage < 65:
             recommendations.append("Review previous quiz materials with a tutor.")
             
-        if data.financialStress >= 8:
-            recommendations.append("Consult the financial aid office for support options.")
 
         # If everything is fine
         if not recommendations:
