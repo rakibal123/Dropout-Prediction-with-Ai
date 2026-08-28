@@ -15,7 +15,7 @@ exports.getMyTeachingCourses = async (req, res) => {
             .populate('courseId')
             .populate('semesterId');
             
-        // Group by semester
+        // Group by semester synchronously to avoid race conditions
         const myTeaching = {};
         for (const assign of assignments) {
             const semId = assign.semesterId._id.toString();
@@ -25,26 +25,29 @@ exports.getMyTeachingCourses = async (req, res) => {
                     courses: []
                 };
             }
+        }
+        
+        await Promise.all(assignments.map(async (assign) => {
+            const semId = assign.semesterId._id.toString();
             
-            // Get student count for this course in this semester
-            const studentCount = await CourseEnrollment.countDocuments({ 
-                courseId: assign.courseId._id, 
-                semesterId: assign.semesterId._id,
-                status: 'Enrolled'
-            });
-            
-            // Get assessed students count
-            const assessedCount = await CourseStudentData.countDocuments({
-                courseId: assign.courseId._id,
-                semesterId: assign.semesterId._id
-            });
+            const [studentCount, assessedCount] = await Promise.all([
+                CourseEnrollment.countDocuments({ 
+                    courseId: assign.courseId._id, 
+                    semesterId: assign.semesterId._id,
+                    status: 'Enrolled'
+                }),
+                CourseStudentData.countDocuments({
+                    courseId: assign.courseId._id,
+                    semesterId: assign.semesterId._id
+                })
+            ]);
             
             myTeaching[semId].courses.push({
                 course: assign.courseId,
                 studentsCount: studentCount,
                 assessedCount: assessedCount
             });
-        }
+        }));
         
         res.status(200).json({ status: 'success', data: { myTeaching: Object.values(myTeaching) } });
     } catch (error) {
@@ -64,17 +67,24 @@ exports.getCourseStudents = async (req, res) => {
         if (!assignment) return res.status(403).json({ status: 'fail', message: 'Not authorized for this course' });
         
         const enrollments = await CourseEnrollment.find({ courseId, semesterId, status: 'Enrolled' })
-            .populate('studentId', 'fullName email rollNumber registrationNumber');
+            .populate('studentId', 'fullName email rollNumber registrationNumber')
+            .lean();
             
-        const students = await Promise.all(enrollments.map(async (enr) => {
-            const data = await CourseStudentData.findOne({ studentId: enr.studentId._id, courseId, semesterId });
+        const studentIds = enrollments.map(e => e.studentId._id);
+        
+        const courseData = await CourseStudentData.find({ studentId: { $in: studentIds }, courseId, semesterId }).lean();
+        const dataMap = {};
+        courseData.forEach(d => dataMap[d.studentId.toString()] = d);
+            
+        const students = enrollments.map(enr => {
+            const data = dataMap[enr.studentId._id.toString()];
             return {
                 student: enr.studentId,
                 dataStatus: data ? 'Available' : 'Pending',
                 riskLevel: data ? data.courseRiskLevel : 'No Data',
                 data: data || null
             };
-        }));
+        });
         
         // Fetch demo records
         const demoRecords = await CourseStudentData.find({ courseId, semesterId, isDemo: true });

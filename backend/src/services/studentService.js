@@ -4,10 +4,12 @@ const PredictionHistory = require('../models/PredictionHistory');
 const BehaviorRecord = require('../models/BehaviorRecord');
 
 const getStudentDashboard = async (userId) => {
-    const user = await User.findById(userId).populate('currentSemester');
-    const profile = await StudentProfile.findOne({ userId });
-    const latestPrediction = await PredictionHistory.findOne({ studentId: userId }).sort({ createdAt: -1 });
-    const predictionCount = await PredictionHistory.countDocuments({ studentId: userId });
+    const [user, profile, latestPrediction, predictionCount] = await Promise.all([
+        User.findById(userId).populate('currentSemester').lean(),
+        StudentProfile.findOne({ userId }).lean(),
+        PredictionHistory.findOne({ studentId: userId }).sort({ createdAt: -1 }).lean(),
+        PredictionHistory.countDocuments({ studentId: userId })
+    ]);
 
     return {
         fullName: user.fullName,
