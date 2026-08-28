@@ -4,7 +4,7 @@ const predictionHistorySchema = new mongoose.Schema({
     studentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: false, // Optional for demo students
         index: true
     },
     behaviorRecordId: {
