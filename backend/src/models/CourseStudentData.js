@@ -55,7 +55,7 @@ const courseStudentDataSchema = new mongoose.Schema({
     
 }, { timestamps: true });
 
-// A student can only have one data record per course per semester (can be updated though)
-courseStudentDataSchema.index({ studentId: 1, courseId: 1, semesterId: 1 }, { unique: true });
+// The unique index on { studentId, courseId, semesterId } has been removed to allow multiple demo students
+// Uniqueness is enforced dynamically in the controllers via findOneAndUpdate and match queries.
 
 module.exports = mongoose.model('CourseStudentData', courseStudentDataSchema);
