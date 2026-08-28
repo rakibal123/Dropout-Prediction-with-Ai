@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Users, FileDown, Activity, Clock } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { MLSandboxModal } from "@/components/MLSandboxModal";
 
 // Interfaces
 interface Semester { _id: string; name: string; }
@@ -21,6 +22,7 @@ export default function TeacherDashboard() {
     // Course Selection State
     const [myTeaching, setMyTeaching] = useState<MyTeachingSemester[]>([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
+    const [isSandboxOpen, setIsSandboxOpen] = useState(false);
 
     useEffect(() => {
         fetchMyTeaching();
@@ -49,9 +51,18 @@ export default function TeacherDashboard() {
         <DashboardLayout role="teacher">
             <div className="flex flex-col gap-8 p-4 md:p-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">My Teaching</h1>
-                    <p className="text-muted-foreground mt-2">Select a course to view students and manage assessments.</p>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">My Teaching</h1>
+                            <p className="text-muted-foreground mt-2">Select a course to view students and manage assessments.</p>
+                        </div>
+                        <Button onClick={() => setIsSandboxOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white shadow-premium gap-2">
+                            <Activity className="h-4 w-4" /> Try ML Sandbox
+                        </Button>
+                    </div>
                 </div>
+
+                <MLSandboxModal isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} />
 
                 {loadingCourses ? (
                     <div className="flex justify-center py-20">
@@ -64,6 +75,9 @@ export default function TeacherDashboard() {
                         <p className="text-muted-foreground max-w-sm mt-2">
                             You currently don't have any courses assigned to you for this semester. Contact the administrator if this is a mistake.
                         </p>
+                        <Button variant="outline" className="mt-6 gap-2" onClick={() => setIsSandboxOpen(true)}>
+                            <Activity className="h-4 w-4 text-purple-500" /> Open Sandbox Simulator
+                        </Button>
                     </div>
                 ) : (
                     <div className="space-y-8">

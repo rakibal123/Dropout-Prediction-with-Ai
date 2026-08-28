@@ -13,5 +13,6 @@ router.get('/courses/:courseId/template', teacherAcademicController.downloadExce
 router.post('/courses/:courseId/upload', teacherAcademicController.uploadCourseData);
 router.post('/courses/:courseId/manual-upload', teacherAcademicController.uploadManualData);
 router.post('/courses/:courseId/predict-preview', teacherAcademicController.predictPreview);
+router.post('/test-prediction', teacherAcademicController.testPrediction);
 
 module.exports = router;

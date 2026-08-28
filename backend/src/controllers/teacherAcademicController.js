@@ -415,3 +415,13 @@ exports.predictPreview = async (req, res) => {
         res.status(400).json({ status: 'fail', message: error.message });
     }
 };
+
+exports.testPrediction = async (req, res) => {
+    try {
+        const predictionService = require('../services/predictionService');
+        const mlResult = await predictionService.predictPreview(req.body);
+        res.status(200).json({ status: 'success', data: mlResult });
+    } catch (error) {
+        res.status(400).json({ status: 'fail', message: error.message });
+    }
+};
