@@ -19,10 +19,24 @@ const createBehaviorRecord = async (studentId, data) => {
     });
 
     if (existingRecord) {
-        throw new AppError("You have already completed today's assessment.", 409);
+        // Update the existing record for today instead of throwing an error
+        Object.assign(existingRecord, {
+            attendancePercentage: data.attendancePercentage,
+            assignmentSubmissionRate: data.assignmentSubmissionRate,
+            quizAverage: data.quizAverage,
+            midtermMarks: data.midtermMarks,
+            studyHoursPerWeek: data.studyHoursPerWeek,
+            engagementScore: data.engagementScore,
+            loginFrequency: data.loginFrequency,
+            participationScore: data.participationScore,
+            stressLevel: data.stressLevel,
+            motivationLevel: data.motivationLevel
+        });
+        await existingRecord.save();
+        return existingRecord;
     }
 
-    // Save the record
+    // Save a new record if none exists for today
     const behaviorRecord = new BehaviorRecord({
         studentId,
         attendancePercentage: data.attendancePercentage,
