@@ -3,7 +3,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
     Calendar as CalendarIcon, Clock, MapPin, User, ChevronLeft, 
     ChevronRight, Plus, Download, Bell, BookOpen, AlertCircle, CheckCircle2
