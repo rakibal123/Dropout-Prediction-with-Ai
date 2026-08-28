@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useState, useEffect } from "react";
 import { 
     Calendar as CalendarIcon, Clock, MapPin, User, ChevronLeft, 
-    ChevronRight, Plus, Download, Bell, BookOpen, AlertCircle, CheckCircle2
+    ChevronRight, Plus, Download, Bell, BookOpen, AlertCircle, CheckCircle2, Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
@@ -31,14 +31,48 @@ export default function StudentSchedulePage() {
     const [timetable, setTimetable] = useState<ScheduleItem[]>([]);
     const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isChangingSemester, setIsChangingSemester] = useState(false);
+    const [semesters, setSemesters] = useState<any[]>([]);
+    const [activeSemester, setActiveSemester] = useState<string>("");
 
     useEffect(() => {
-        const fetchCoursesAndSchedule = async () => {
+        const fetchInitialData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`/api/student/courses`, {
+                
+                // Fetch semesters
+                const semRes = await fetch(`/api/student/semesters`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                const semData = await semRes.json();
+                if (semData.success && semData.data.semesters) {
+                    setSemesters(semData.data.semesters);
+                }
+
+                // Fetch current semester
+                const currSemRes = await fetch(`/api/student/current-semester`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const currSemData = await currSemRes.json();
+                if (currSemData.success && currSemData.data.currentSemester) {
+                    setActiveSemester(currSemData.data.currentSemester._id);
+                }
+
+                await fetchCoursesAndSchedule(token);
+            } catch (err) {
+                console.error("Failed to load initial data", err);
+                setIsLoading(false);
+            }
+        };
+        fetchInitialData();
+    }, []);
+
+    const fetchCoursesAndSchedule = async (token: string) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`/api/student/courses`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
                 const data = await res.json();
                 
                 if (data.success && data.courses && data.courses.length > 0) {
@@ -94,9 +128,34 @@ export default function StudentSchedulePage() {
             } finally {
                 setIsLoading(false);
             }
-        };
-        fetchCoursesAndSchedule();
-    }, []);
+    };
+
+    const handleSemesterChange = async (semesterId: string) => {
+        setActiveSemester(semesterId);
+        setIsChangingSemester(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/student/current-semester`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ semesterId })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                showToast("Semester changed successfully", "success");
+                await fetchCoursesAndSchedule(token || '');
+            } else {
+                showToast(data.message || "Failed to change semester", "error");
+            }
+        } catch (error) {
+            showToast("Connection error", "error");
+        } finally {
+            setIsChangingSemester(false);
+        }
+    };
 
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
@@ -110,7 +169,18 @@ export default function StudentSchedulePage() {
                         <h1 className="text-2xl font-bold tracking-tight">Class Schedule & Timetable</h1>
                         <p className="text-muted-foreground">View weekly class sessions, lab hours, and upcoming examination schedules.</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <select
+                            className="flex h-9 w-full sm:w-auto rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-semibold"
+                            value={activeSemester}
+                            onChange={(e) => handleSemesterChange(e.target.value)}
+                            disabled={isChangingSemester}
+                        >
+                            <option value="" disabled>Select Semester</option>
+                            {semesters.map(sem => (
+                                <option key={sem._id} value={sem._id}>{sem.name}</option>
+                            ))}
+                        </select>
                         <div className="flex bg-secondary p-1 rounded-lg border border-border">
                             {(["Weekly", "Daily", "List"] as const).map((mode) => (
                                 <button

@@ -14,6 +14,15 @@ exports.getCurrentSemester = async (req, res) => {
     }
 };
 
+exports.getAllSemesters = async (req, res) => {
+    try {
+        const semesters = await Semester.find({ isActive: true }).sort({ number: 1 });
+        res.status(200).json({ status: 'success', data: { semesters } });
+    } catch (error) {
+        res.status(400).json({ status: 'fail', message: error.message });
+    }
+};
+
 exports.updateCurrentSemester = async (req, res) => {
     try {
         const { semesterId } = req.body;
