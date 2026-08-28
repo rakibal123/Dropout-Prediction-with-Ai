@@ -177,9 +177,15 @@ export default function StudentSchedulePage() {
                             disabled={isChangingSemester}
                         >
                             <option value="" disabled>Select Semester</option>
-                            {semesters.map(sem => (
-                                <option key={sem._id} value={sem._id}>{sem.name}</option>
-                            ))}
+                            {semesters.map(sem => {
+                                const currentSemObj = semesters.find(s => s._id === activeSemester);
+                                const isPrevious = currentSemObj ? sem.number < currentSemObj.number : false;
+                                return (
+                                    <option key={sem._id} value={sem._id} disabled={isPrevious}>
+                                        {sem.name} {isPrevious ? '(Completed)' : ''}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <div className="flex bg-secondary p-1 rounded-lg border border-border">
                             {(["Weekly", "Daily", "List"] as const).map((mode) => (

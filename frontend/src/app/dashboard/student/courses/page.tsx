@@ -52,7 +52,7 @@ export default function StudentCoursesPage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const semData = await semRes.json();
-                if (semData.success && semData.data.semesters) {
+                if (semData.status === 'success' && semData.data.semesters) {
                     setSemesters(semData.data.semesters);
                 }
 
@@ -61,7 +61,7 @@ export default function StudentCoursesPage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const currSemData = await currSemRes.json();
-                if (currSemData.success && currSemData.data.currentSemester) {
+                if (currSemData.status === 'success' && currSemData.data.currentSemester) {
                     setActiveSemester(currSemData.data.currentSemester._id);
                 }
 
@@ -174,9 +174,15 @@ export default function StudentCoursesPage() {
                             disabled={isChangingSemester}
                         >
                             <option value="" disabled>Select Semester</option>
-                            {semesters.map(sem => (
-                                <option key={sem._id} value={sem._id}>{sem.name}</option>
-                            ))}
+                            {semesters.map(sem => {
+                                const currentSemObj = semesters.find(s => s._id === activeSemester);
+                                const isPrevious = currentSemObj ? sem.number < currentSemObj.number : false;
+                                return (
+                                    <option key={sem._id} value={sem._id} disabled={isPrevious}>
+                                        {sem.name} {isPrevious ? '(Completed)' : ''}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <select 
                             value={selectedCategory} 

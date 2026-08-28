@@ -30,8 +30,14 @@ exports.updateCurrentSemester = async (req, res) => {
         const semester = await Semester.findById(semesterId);
         if (!semester) return res.status(404).json({ status: 'fail', message: 'Semester not found' });
         
+        // Prevent downgrading to a previous semester
+        const user = await User.findById(req.user.id).populate('currentSemester');
+        if (user.currentSemester && user.currentSemester.number > semester.number) {
+            return res.status(400).json({ status: 'fail', message: 'You cannot downgrade to a previous semester.' });
+        }
+        
         // Update user's current semester
-        const user = await User.findByIdAndUpdate(req.user.id, { currentSemester: semesterId }, { new: true }).populate('currentSemester');
+        const updatedUser = await User.findByIdAndUpdate(req.user.id, { currentSemester: semesterId }, { new: true }).populate('currentSemester');
         
         // Auto-enroll the student in courses for this semester (if not already enrolled)
         const courses = await Course.find({ semesterId: semester._id });
@@ -43,7 +49,7 @@ exports.updateCurrentSemester = async (req, res) => {
             );
         }
         
-        res.status(200).json({ status: 'success', data: { currentSemester: user.currentSemester } });
+        res.status(200).json({ status: 'success', data: { currentSemester: updatedUser.currentSemester } });
     } catch (error) {
         res.status(400).json({ status: 'fail', message: error.message });
     }
